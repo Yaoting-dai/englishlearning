@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { SongData } from '@/data/songs'
+import { useSpeech } from '@/hooks/useSpeech'
 
 interface SongPlayerProps {
   song: SongData
@@ -13,20 +14,35 @@ export default function SongPlayer({ song }: SongPlayerProps) {
   const [progress, setProgress] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const lyricsRef = useRef<HTMLDivElement>(null)
+  const { speak } = useSpeech()
+  const lineRef = useRef(0)
+
+  const totalDuration = Math.max(...song.lyrics.map(l => l.time)) + 5
 
   useEffect(() => {
     if (isPlaying) {
       timerRef.current = setInterval(() => {
         setProgress(p => {
           const next = p + 1
+          if (next >= totalDuration) {
+            setIsPlaying(false)
+            setCurrentLine(0)
+            return 0
+          }
           const lineIndex = song.lyrics.findLastIndex(l => l.time <= next)
-          if (lineIndex >= 0 && lineIndex !== currentLine) setCurrentLine(lineIndex)
-          return next > 100 ? 0 : next
+          if (lineIndex >= 0) setCurrentLine(lineIndex)
+          return next
         })
       }, 1000)
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [isPlaying, song.lyrics, currentLine])
+  }, [isPlaying, song.lyrics])
+
+  useEffect(() => {
+    if (isPlaying && song.lyrics[currentLine]) {
+      speak(song.lyrics[currentLine].text, 0.85)
+    }
+  }, [currentLine, isPlaying, song.lyrics, speak])
 
   useEffect(() => {
     if (lyricsRef.current) {
@@ -35,7 +51,15 @@ export default function SongPlayer({ song }: SongPlayerProps) {
     }
   }, [currentLine])
 
-  const togglePlay = () => setIsPlaying(!isPlaying)
+  const togglePlay = () => {
+    if (isPlaying) {
+      setIsPlaying(false)
+    } else {
+      setProgress(0)
+      setCurrentLine(0)
+      setIsPlaying(true)
+    }
+  }
 
   return (
     <div>
@@ -63,7 +87,7 @@ export default function SongPlayer({ song }: SongPlayerProps) {
       <div className="flex items-center gap-3 mb-4">
         <span className="text-xs text-gray-400">{Math.floor(progress / 60)}:{String(progress % 60).padStart(2, '0')}</span>
         <div className="flex-1 h-2 bg-gray-200 rounded-full">
-          <div className="h-full bg-pink-500 rounded-full relative" style={{ width: `${progress}%` }}>
+          <div className="h-full bg-pink-500 rounded-full relative" style={{ width: `${(progress / totalDuration) * 100}%` }}>
             <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-pink-500 rounded-full shadow-md" />
           </div>
         </div>

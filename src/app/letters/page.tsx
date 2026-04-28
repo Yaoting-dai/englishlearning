@@ -9,6 +9,7 @@ import { useProgress } from '@/hooks/useProgress'
 
 export default function LettersPage() {
   const [index, setIndex] = useState(0)
+  const [feedback, setFeedback] = useState('')
   const letter = letters[index]
   const { speak } = useSpeech()
   const { progress, markLetterLearned } = useProgress()
@@ -18,9 +19,17 @@ export default function LettersPage() {
   }
 
   const handleSpeak = () => {
+    setFeedback('')
     speak(`${letter.upper} ${letter.lower}`)
     markLetterLearned(letter.id)
     setTimeout(() => speak(letter.word), 1200)
+  }
+
+  const handleRepeat = () => {
+    speak(letter.word)
+    markLetterLearned(letter.id)
+    setFeedback('🎤 请跟读...')
+    setTimeout(() => setFeedback(''), 1500)
   }
 
   return (
@@ -54,9 +63,13 @@ export default function LettersPage() {
       <div className="flex justify-center gap-6 mt-5">
         <BigButton icon="◀" label="上一个" color="bg-gray-300" onClick={() => goTo(index - 1)} />
         <BigButton icon="🔊" label="发音" color="bg-green-500" onClick={handleSpeak} />
-        <BigButton icon="🎤" label="跟读" color="bg-blue-500" onClick={() => markLetterLearned(letter.id)} />
+        <BigButton icon="🎤" label="跟读" color="bg-blue-500" onClick={handleRepeat} />
         <BigButton icon="▶" label="下一个" color="bg-gray-300" onClick={() => goTo(index + 1)} />
       </div>
+
+      {feedback && (
+        <div className="text-center py-3 text-blue-500 font-medium animate-pulse">{feedback}</div>
+      )}
 
       <div className="flex justify-center gap-1.5 mt-5 flex-wrap">
         {letters.map((l, i) => (

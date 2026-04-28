@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useAgeLevel } from '@/contexts/AgeLevelContext'
 import StartButton from '@/components/StartButton'
@@ -13,44 +13,114 @@ interface Message {
   sender: 'ai' | 'user'
 }
 
-const quickPhrases: Record<string, string[]> = {
-  kindergarten: ['Hello!', 'My name is...', 'I like apples', 'Thank you!', 'Goodbye!'],
-  elementary: ['How are you?', 'I like animals', 'Tell me a story', 'What is this?', 'Can you help me?'],
-  middle: ['What do you think?', 'Tell me about your day', 'I have a question', 'Let\'s practice', 'Give me a challenge'],
-}
-
 export default function AIChatPage() {
   const { info, level } = useAgeLevel()
-  const { speak } = useSpeech()
+  const { speak, stop } = useSpeech()
   const [started, setStarted] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
+  const speakingRef = useRef(false)
 
-  const addMessage = useCallback(async (text: string, sender: 'ai' | 'user') => {
+  const addMessage = useCallback((text: string, sender: 'ai' | 'user') => {
     setMessages(prev => [...prev, { text, sender }])
-    return text
   }, [])
+
+  // Start speech recognition
+  const startListening = useCallback(() => {
+    if (typeof window === 'undefined') return
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) return
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.continuous = false
+    recognition.interimResults = false
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript
+      recognitionRef.current = null
+      setIsListening(false)
+      handleUserSpeech(transcript)
+    }
+
+    recognition.onerror = () => {
+      recognitionRef.current = null
+      setIsListening(false)
+    }
+
+    recognition.onend = () => {
+      recognitionRef.current = null
+      setIsListening(false)
+    }
+
+    recognitionRef.current = recognition
+    recognition.start()
+    setIsListening(true)
+  }, [])
+
+  // Stop speech recognition
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop() } catch {}
+      recognitionRef.current = null
+    }
+    setIsListening(false)
+  }, [])
+
+  // Handle user voice input
+  const handleUserSpeech = useCallback(async (text: string) => {
+    if (!text.trim() || isLoading) return
+    stopListening()
+    addMessage(text, 'user')
+    setIsLoading(true)
+    try {
+      const reply = await sendMessage([{ role: 'user', content: text }], level)
+      addMessage(reply, 'ai')
+      // Speak AI reply, then listen again
+      speakingRef.current = true
+      speak(reply, undefined, () => {
+        speakingRef.current = false
+        if (started) startListening()
+      })
+    } catch {
+      const fallback = "That's great! Tell me more! 😊"
+      addMessage(fallback, 'ai')
+      speak(fallback, undefined, () => {
+        speakingRef.current = false
+        if (started) startListening()
+      })
+    }
+    setIsLoading(false)
+  }, [isLoading, level, speak, addMessage, startListening, stopListening, started])
 
   const handleStart = () => {
     setStarted(true)
-    const greeting = "Hi there! I'm Elizabeth. Let's start our English class! 🎉"
+    const greeting = "Hi there! I'm Elizabeth! Let's learn English together! 🎉"
     addMessage(greeting, 'ai')
-    setTimeout(() => speak(greeting), 500)
+    speakingRef.current = true
+    speak(greeting, undefined, () => {
+      speakingRef.current = false
+      startListening()
+    })
   }
 
-  const handlePhraseClick = useCallback(async (phrase: string) => {
-    if (isLoading) return
-    addMessage(phrase, 'user')
-    setIsLoading(true)
-    try {
-      const reply = await sendMessage([{ role: 'user', content: phrase }], level)
-      addMessage(reply, 'ai')
-      setTimeout(() => speak(reply), 500)
-    } catch {
-      addMessage("That's great! Tell me more about that! 😊", 'ai')
+  const handleStop = () => {
+    stop()
+    stopListening()
+    speakingRef.current = false
+    setStarted(false)
+    setMessages([])
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stop()
+      stopListening()
     }
-    setIsLoading(false)
-  }, [isLoading, level, speak, addMessage])
+  }, [stop, stopListening])
 
   const speakMessage = (text: string) => speak(text)
 
@@ -66,12 +136,24 @@ export default function AIChatPage() {
             className="rounded-full object-cover shadow-xl mb-4" />
           <div className="text-2xl font-bold text-blue-700">Elizabeth</div>
           <div className="text-base text-gray-400 mt-1">Your AI English Teacher</div>
+          <div className="text-sm text-gray-400 mt-4 text-center max-w-xs">
+            🎤 Voice conversation · Speak and I&apos;ll reply!
+          </div>
           <div className="mt-8">
             <StartButton onClick={handleStart} />
           </div>
         </div>
       ) : (
         <div className="bg-white rounded-2xl p-4 shadow-sm">
+          {/* Header with stop button */}
+          <div className="flex justify-end mb-2">
+            <button onClick={handleStop}
+              className="text-xs text-red-500 border border-red-200 rounded-full px-3 py-1 hover:bg-red-50">
+              ✕ End Class
+            </button>
+          </div>
+
+          {/* Messages */}
           <div className="min-h-[400px] max-h-[450px] overflow-y-auto mb-4">
             {messages.map((m, i) => (
               <div key={i} onClick={() => m.sender === 'ai' && speakMessage(m.text)}
@@ -86,17 +168,18 @@ export default function AIChatPage() {
             )}
           </div>
 
-          <div className="border-t border-gray-100 pt-3">
-            <p className="text-xs text-gray-400 text-center mb-2">Tap a phrase to say it:</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {quickPhrases[level].map((phrase, i) => (
-                <button key={i} onClick={() => handlePhraseClick(phrase)}
-                  disabled={isLoading}
-                  className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium border border-blue-200 disabled:opacity-50 active:scale-95 transition-all">
-                  {phrase}
-                </button>
-              ))}
-            </div>
+          {/* Voice status */}
+          <div className="border-t border-gray-100 pt-3 text-center">
+            {isListening ? (
+              <div className="flex items-center justify-center gap-2 text-blue-500">
+                <span className="w-3 h-3 bg-blue-500 rounded-full animate-ping" />
+                <span className="text-sm font-medium">🎤 Listening... Speak now</span>
+              </div>
+            ) : isLoading ? (
+              <div className="text-sm text-gray-400">⏳ Waiting for Elizabeth...</div>
+            ) : (
+              <div className="text-sm text-gray-400">💬 Elizabeth is listening for you</div>
+            )}
           </div>
         </div>
       )}
