@@ -1,0 +1,53 @@
+<h2>语音评测方案对比</h2>
+<p class="subtitle">幼儿发音识别与纠音 — 专业级方案</p>
+
+<div class="section">
+  <p>跟读场景需要<strong>音素级评测</strong>（能精确到哪个音素发错了）、给出<strong>评分反馈</strong>、并兼容<strong>儿童音色</strong>。以下三个方案都是成熟的选择：</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Azure Speech — 发音评估 ⭐ 推荐</h3>
+      <p><strong>Microsoft 出品，语言学习场景最成熟</strong></p>
+      <ul>
+        <li>✅ 专门的 <strong>Pronunciation Assessment API</strong>，音素级精准评测</li>
+        <li>✅ 输出准确度、流利度、完整性、音素级纠错</li>
+        <li>✅ 适配儿童声音</li>
+        <li>✅ Web SDK 完善，iPad Safari 兼容</li>
+        <li>💰 按音频时长计费，约 $0.006/分钟（纯评测）</li>
+      </ul>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>讯飞语音评测</h3>
+      <p><strong>国内教育市场占有率最高</strong></p>
+      <ul>
+        <li>✅ 英语口语评测深耕多年，中文母语者英语发音识别极准</li>
+        <li>✅ 音素级、句子级、篇章级评测都支持</li>
+        <li>⚠️ Web SDK 功能有裁剪，部分能力需要原生 App</li>
+        <li>💰 按调用次数计费，约 0.2 元/次</li>
+      </ul>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>火山引擎语音（豆包同生态）</h3>
+      <p><strong>和豆包 AI 同一生态，统一管理</strong></p>
+      <ul>
+        <li>✅ TTS + 语音识别在一家搞定</li>
+        <li>⚠️ 发音评测（Pronunciation Assessment）能力不如 Azure 专业</li>
+        <li>✅ 与豆包 API 同一火山控制台，管理方便</li>
+        <li>💰 价格中等</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p><strong>我的建议：</strong>方案 A（Azure）做评测最专业 + 豆包做 AI 对话，各取所长。语音走 Azure，对话走火山，互不冲突。方案 C 虽然管理方便，但发音评测能力相比 Azure 有差距。</p>
+</div>

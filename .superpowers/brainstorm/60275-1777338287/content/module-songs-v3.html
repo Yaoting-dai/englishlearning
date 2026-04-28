@@ -1,0 +1,52 @@
+<h2>模块4：儿歌播放 v3</h2>
+<p class="subtitle">大卡片列表 + 滚动歌词播放器</p>
+
+<div class="section">
+  <h3>播放器界面 — 滚动歌词</h3>
+  <div class="mockup">
+    <div class="mockup-header">▶ ABC Song</div>
+    <div class="mockup-body" style="padding: 20px; text-align: center;">
+      <!-- 歌词滚动区域 -->
+      <div style="background:#FAFAFA;border-radius:16px;padding:20px;min-height:260px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;">
+        <div style="font-size:16px;color:#ccc;padding:4px 0;">A-B-C-D-E-F-G</div>
+        <div style="font-size:16px;color:#999;padding:4px 0;">H-I-J-K-L-M-N-O-P</div>
+        <div style="font-size:24px;font-weight:bold;color:#E91E63;padding:8px 0;transition:all 0.3s;">Q-R-S-T-U-V-W</div>
+        <div style="font-size:16px;color:#999;padding:4px 0;">X-Y-Z</div>
+        <div style="font-size:16px;color:#ccc;padding:4px 0;">Now I know my ABCs</div>
+        <div style="font-size:16px;color:#ccc;padding:4px 0;">Next time won't you sing with me</div>
+      </div>
+
+      <!-- 进度条 -->
+      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;">
+        <span style="font-size:13px;color:#999;">1:28</span>
+        <div style="flex:1;height:6px;background:#E0E0E0;border-radius:3px;">
+          <div style="width:45%;height:100%;background:#E91E63;border-radius:3px;position:relative;">
+            <div style="width:14px;height:14px;background:#E91E63;border-radius:50%;position:absolute;right:-7px;top:-4px;"></div>
+          </div>
+        </div>
+        <span style="font-size:13px;color:#999;">3:45</span>
+      </div>
+
+      <!-- 控制按钮 -->
+      <div style="display:flex;justify-content:center;align-items:center;gap:40px;margin-top:16px;">
+        <div style="width:48px;height:48px;background:#F5F5F5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#666;">⏮</div>
+        <div style="width:72px;height:72px;background:#E91E63;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;box-shadow:0 4px 16px rgba(233,30,99,0.4);">⏸</div>
+        <div style="width:48px;height:48px;background:#F5F5F5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#666;">⏭</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>歌词滚动效果说明</h3>
+  <ul>
+    <li><strong>当前行</strong>：居中 + 大号字体 + 粉色高亮</li>
+    <li><strong>已唱行</strong>：淡灰色，向上滚动淡出</li>
+    <li><strong>未唱行</strong>：浅灰色，在下方预备</li>
+    <li><strong>自动滚动</strong>：播放到哪行，歌词自动滚动到视野中央</li>
+    <li>点击歌词区域可拖动到任意位置</li>
+  </ul>
+</div>
+
+<div style="border-top: 1px solid #ddd; margin: 24px 0;"></div>
+<p>歌词自动滚动，当前行大号高亮居中显示。满意吗？接下来设计最后一个模块——美文阅读。</p>

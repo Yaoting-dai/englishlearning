@@ -1,0 +1,100 @@
+<h2>模块6：AI 对话</h2>
+<p class="subtitle">AI英语老师 · 发音教练 · 故事生成 — 接入豆包大模型</p>
+
+<div class="section">
+  <h3>三种模式入口</h3>
+  <div class="mockup">
+    <div class="mockup-header">🤖 AI 英语</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:center;gap:20px;background:linear-gradient(135deg,#E3F2FD,#BBDEFB);border-radius:20px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="width:72px;height:72px;background:linear-gradient(135deg,#42A5F5,#1565C0);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;">🧑‍🏫</div>
+          <div style="flex:1;">
+            <div style="font-weight:bold;font-size:20px;">AI English Teacher</div>
+            <div style="font-size:14px;color:#999;margin-top:2px;">自由对话，AI 会根据年龄调整难度</div>
+          </div>
+          <div style="font-size:24px;color:#999;">▸</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:20px;background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border-radius:20px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="width:72px;height:72px;background:linear-gradient(135deg,#66BB6A,#2E7D32);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;">🎯</div>
+          <div style="flex:1;">
+            <div style="font-weight:bold;font-size:20px;">Pronunciation Coach</div>
+            <div style="font-size:14px;color:#999;margin-top:2px;">说句子 → AI 纠正发音 + 示范</div>
+          </div>
+          <div style="font-size:24px;color:#999;">▸</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:20px;background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border-radius:20px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="width:72px;height:72px;background:linear-gradient(135deg,#FFA726,#E65100);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;">📖</div>
+          <div style="flex:1;">
+            <div style="font-weight:bold;font-size:20px;">Story Generator</div>
+            <div style="font-size:14px;color:#999;margin-top:2px;">AI 生成适龄英文故事</div>
+          </div>
+          <div style="font-size:24px;color:#999;">▸</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>对话界面 — AI English Teacher</h3>
+  <div class="mockup">
+    <div class="mockup-header">🧑‍🏫 AI Teacher · 幼儿园</div>
+    <div class="mockup-body" style="padding:16px;">
+      <!-- 消息区域 -->
+      <div style="min-height:240px;">
+        <!-- AI 消息 -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+          <div style="width:44px;height:44px;background:linear-gradient(135deg,#42A5F5,#1565C0);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;">🤖</div>
+          <div style="background:#E3F2FD;border-radius:0 16px 16px 16px;padding:14px 18px;max-width:80%;">
+            <div style="font-size:20px;line-height:1.6;">Hello! What's your name?</div>
+            <div style="font-size:12px;color:#999;margin-top:4px;">🔊 点击听发音</div>
+          </div>
+        </div>
+        <!-- 用户消息 -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-direction:row-reverse;">
+          <div style="width:44px;height:44px;background:#FF9800;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0;">👤</div>
+          <div style="background:#FFF3E0;border-radius:16px 0 16px 16px;padding:14px 18px;max-width:80%;">
+            <div style="font-size:20px;line-height:1.6;">My name is Xiaoming!</div>
+            <div style="font-size:12px;color:#999;margin-top:4px;">🎤 已录音</div>
+          </div>
+        </div>
+        <!-- AI 回复 -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+          <div style="width:44px;height:44px;background:linear-gradient(135deg,#42A5F5,#1565C0);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;">🤖</div>
+          <div style="background:#E3F2FD;border-radius:0 16px 16px 16px;padding:14px 18px;max-width:80%;">
+            <div style="font-size:20px;line-height:1.6;">Nice to meet you, Xiaoming! 🎉</div>
+            <div style="font-size:12px;color:#999;margin-top:4px;">🔊 点击听发音</div>
+          </div>
+        </div>
+      </div>
+      <!-- 输入区域 -->
+      <div style="display:flex;gap:12px;align-items:center;border-top:1px solid #eee;padding-top:16px;margin-top:8px;">
+        <div style="flex:1;background:#F5F5F5;border-radius:24px;padding:14px 18px;font-size:18px;color:#999;">Type or speak...</div>
+        <div style="width:56px;height:56px;background:#2196F3;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;box-shadow:0 4px 12px rgba(33,150,243,0.3);">🎤</div>
+        <div style="width:56px;height:56px;background:#4CAF50;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;box-shadow:0 4px 12px rgba(76,175,80,0.3);">➤</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>三种模式说明</h3>
+  <div class="cards" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="card"><div class="card-body">
+      <h3>🧑‍🏫 AI Teacher</h3>
+      <p>自由英语对话。AI 根据年龄自动调整：幼儿园用简单句子+表情，小学正常语速，初中接近母语对话。</p>
+    </div></div>
+    <div class="card"><div class="card-body">
+      <h3>🎯 Pronunciation Coach</h3>
+      <p>孩子说一句英文，AI 先给出评分，再逐词纠正发音问题，最后示范标准读音。</p>
+    </div></div>
+    <div class="card"><div class="card-body">
+      <h3>📖 Story Generator</h3>
+      <p>输入关键词或主题，AI 生成适龄故事。幼儿园版本：3-5句+配图建议；小学版：短段落；初中版：完整故事。</p>
+    </div></div>
+  </div>
+</div>
+
+<div style="border-top: 1px solid #ddd; margin: 24px 0;"></div>
+<p>AI对话模块设计完毕！所有6个模块的初步设计都完成了。你现在整体看看，有什么想调整的吗？没问题的话我整理成完整的设计文档。</p>

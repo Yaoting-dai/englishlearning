@@ -1,0 +1,50 @@
+<h2>模块4：儿歌播放 v4</h2>
+<p class="subtitle">大卡片列表 + 显示歌名的滚动歌词播放器</p>
+
+<div class="section">
+  <h3>播放器界面 — 显示歌名 + 滚动歌词</h3>
+  <div class="mockup">
+    <div class="mockup-header">▶ 正在播放</div>
+    <div class="mockup-body" style="padding: 24px; text-align: center;">
+      <!-- 歌名 -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;">
+        <div style="width:48px;height:48px;background:linear-gradient(135deg,#FF9800,#FF5722);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px rgba(255,152,0,0.3);">🔤</div>
+        <div style="text-align:left;">
+          <div style="font-size:22px;font-weight:bold;">ABC Song</div>
+          <div style="font-size:14px;color:#999;">Nursery Rhyme · 3:45</div>
+        </div>
+      </div>
+
+      <!-- 歌词滚动区域 -->
+      <div style="background:#FAFAFA;border-radius:16px;padding:20px;min-height:220px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;">
+        <div style="font-size:16px;color:#ccc;padding:4px 0;">A-B-C-D-E-F-G</div>
+        <div style="font-size:16px;color:#999;padding:4px 0;">H-I-J-K-L-M-N-O-P</div>
+        <div style="font-size:24px;font-weight:bold;color:#E91E63;padding:8px 0;">Q-R-S-T-U-V-W</div>
+        <div style="font-size:16px;color:#999;padding:4px 0;">X-Y-Z</div>
+        <div style="font-size:16px;color:#ccc;padding:4px 0;">Now I know my ABCs</div>
+        <div style="font-size:16px;color:#ccc;padding:4px 0;">Next time won't you sing with me</div>
+      </div>
+
+      <!-- 进度条 -->
+      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;">
+        <span style="font-size:13px;color:#999;">1:28</span>
+        <div style="flex:1;height:6px;background:#E0E0E0;border-radius:3px;">
+          <div style="width:45%;height:100%;background:#E91E63;border-radius:3px;position:relative;">
+            <div style="width:14px;height:14px;background:#E91E63;border-radius:50%;position:absolute;right:-7px;top:-4px;"></div>
+          </div>
+        </div>
+        <span style="font-size:13px;color:#999;">3:45</span>
+      </div>
+
+      <!-- 控制按钮 -->
+      <div style="display:flex;justify-content:center;align-items:center;gap:40px;margin-top:16px;">
+        <div style="width:48px;height:48px;background:#F5F5F5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#666;">⏮</div>
+        <div style="width:72px;height:72px;background:#E91E63;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;box-shadow:0 4px 16px rgba(233,30,99,0.4);">⏸</div>
+        <div style="width:48px;height:48px;background:#F5F5F5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#666;">⏭</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="border-top: 1px solid #ddd; margin: 24px 0;"></div>
+<p>播放器顶部加了歌名 + 封面小图标。满意吗？最后设计美文阅读和AI对话模块。</p>

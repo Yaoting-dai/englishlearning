@@ -1,0 +1,48 @@
+<h2>模块5：美文阅读 v3</h2>
+<p class="subtitle">句子滚动高亮 + 超大按钮 + 大号文字</p>
+
+<div class="section">
+  <h3>阅读页面 — 朗读模式（句子滚动高亮）</h3>
+  <div class="mockup">
+    <div class="mockup-header">📖 The Cat and the Mouse</div>
+    <div class="mockup-body" style="padding: 20px;">
+      <!-- 超大按钮栏 -->
+      <div style="display:flex;justify-content:center;gap:24px;margin-bottom:20px;">
+        <div style="width:88px;height:88px;background:#4CAF50;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 16px rgba(76,175,80,0.4);">
+          <div style="font-size:32px;">🔊</div>
+          <div style="font-size:12px;">朗读</div>
+        </div>
+        <div style="width:88px;height:88px;background:#2196F3;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 16px rgba(33,150,243,0.4);">
+          <div style="font-size:32px;">🎤</div>
+          <div style="font-size:12px;">跟读</div>
+        </div>
+      </div>
+      <!-- 文章滚动区域（类似歌词效果） -->
+      <div style="background:#FAFAFA;border-radius:16px;padding:20px;min-height:280px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;">
+        <div style="font-size:18px;color:#ccc;padding:6px 0;transition:all 0.3s;">Once upon a time, there was a little cat named Mimi.</div>
+        <div style="font-size:18px;color:#999;padding:6px 0;">She lived in a big house with a kind girl named Lily.</div>
+        <div style="font-size:24px;font-weight:bold;color:#E91E63;padding:10px 0;transition:all 0.3s;">One day, Mimi saw a small mouse in the kitchen.</div>
+        <div style="font-size:18px;color:#999;padding:6px 0;">The mouse was eating a piece of cheese.</div>
+        <div style="font-size:18px;color:#ccc;padding:6px 0;">"Hello!" said the mouse. "This cheese is very good."</div>
+        <div style="font-size:18px;color:#ccc;padding:6px 0;">Mimi smiled. "No, thank you. I like fish better!"</div>
+      </div>
+      <!-- 点词翻译 -->
+      <div style="background:#FFF8E1;border:1px solid #FFE082;border-radius:12px;padding:12px;margin-top:16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;background:#FF9800;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">🔊</div>
+        <div>
+          <div><strong>mouse</strong> /maʊs/</div>
+          <div style="font-size:14px;color:#666;">n. 老鼠</div>
+        </div>
+      </div>
+      <!-- 进度 -->
+      <div style="display:flex;justify-content:space-between;margin-top:16px;font-size:14px;color:#999;">
+        <span>◀ 上一篇</span>
+        <span>5 / 15</span>
+        <span style="color:#4CAF50;font-weight:bold;">下一篇 ▶</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="border-top: 1px solid #ddd; margin: 24px 0;"></div>
+<p>88px 超大朗读/跟读按钮，文章句子像歌词一样滚动高亮——当前句子居中放大+粉色高亮，已读淡出，未读待滚动。点词翻译保留。满意吗？最后设计AI对话模块。</p>

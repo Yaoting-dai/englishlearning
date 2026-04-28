@@ -1,0 +1,231 @@
+export interface SongLine {
+  time: number // seconds
+  text: string
+}
+
+export interface SongData {
+  id: string
+  title: string
+  emoji: string
+  category: string
+  duration: string
+  audioSrc: string
+  lyrics: SongLine[]
+}
+
+export const songs: SongData[] = [
+  {
+    id: 'abc',
+    title: 'ABC Song',
+    emoji: '🔤',
+    category: 'Alphabet',
+    duration: '3:45',
+    audioSrc: '/audio/abc-song.mp3',
+    lyrics: [
+      { time: 0, text: 'A-B-C-D-E-F-G' },
+      { time: 5, text: 'H-I-J-K-L-M-N-O-P' },
+      { time: 10, text: 'Q-R-S-T-U-V-W' },
+      { time: 15, text: 'X-Y-Z' },
+      { time: 18, text: 'Now I know my ABCs' },
+      { time: 23, text: 'Next time won\'t you sing with me' },
+    ],
+  },
+  {
+    id: 'twinkle',
+    title: 'Twinkle Twinkle Little Star',
+    emoji: '⭐',
+    category: 'Lullaby',
+    duration: '2:30',
+    audioSrc: '/audio/twinkle.mp3',
+    lyrics: [
+      { time: 0, text: 'Twinkle, twinkle, little star' },
+      { time: 5, text: 'How I wonder what you are' },
+      { time: 10, text: 'Up above the world so high' },
+      { time: 15, text: 'Like a diamond in the sky' },
+      { time: 20, text: 'Twinkle, twinkle, little star' },
+      { time: 25, text: 'How I wonder what you are' },
+    ],
+  },
+  {
+    id: 'wheels',
+    title: 'Wheels on the Bus',
+    emoji: '🚌',
+    category: 'Action',
+    duration: '4:15',
+    audioSrc: '/audio/wheels.mp3',
+    lyrics: [
+      { time: 0, text: 'The wheels on the bus go round and round' },
+      { time: 8, text: 'Round and round, round and round' },
+      { time: 12, text: 'The wheels on the bus go round and round' },
+      { time: 16, text: 'All through the town' },
+      { time: 20, text: 'The wipers on the bus go swish, swish, swish' },
+      { time: 28, text: 'Swish, swish, swish, swish, swish, swish' },
+      { time: 32, text: 'The wipers on the bus go swish, swish, swish' },
+      { time: 36, text: 'All through the town' },
+    ],
+  },
+  {
+    id: 'old-macdonald',
+    title: 'Old MacDonald Had a Farm',
+    emoji: '🐄',
+    category: 'Animals',
+    duration: '3:30',
+    audioSrc: '/audio/old-macdonald.mp3',
+    lyrics: [
+      { time: 0, text: 'Old MacDonald had a farm, E-I-E-I-O' },
+      { time: 6, text: 'And on his farm he had a cow, E-I-E-I-O' },
+      { time: 12, text: 'With a moo-moo here and a moo-moo there' },
+      { time: 18, text: 'Here a moo, there a moo, everywhere a moo-moo' },
+      { time: 24, text: 'Old MacDonald had a farm, E-I-E-I-O' },
+    ],
+  },
+  {
+    id: 'mary-lamb',
+    title: 'Mary Had a Little Lamb',
+    emoji: '🐑',
+    category: 'Classic',
+    duration: '2:15',
+    audioSrc: '/audio/mary-lamb.mp3',
+    lyrics: [
+      { time: 0, text: 'Mary had a little lamb, little lamb, little lamb' },
+      { time: 8, text: 'Mary had a little lamb, its fleece was white as snow' },
+      { time: 16, text: 'And everywhere that Mary went, Mary went, Mary went' },
+      { time: 24, text: 'Everywhere that Mary went, the lamb was sure to go' },
+      { time: 32, text: 'It followed her to school one day, school one day, school one day' },
+      { time: 40, text: 'It followed her to school one day, which was against the rules' },
+    ],
+  },
+  {
+    id: 'row-boat',
+    title: 'Row Row Row Your Boat',
+    emoji: '⛵',
+    category: 'Action',
+    duration: '1:45',
+    audioSrc: '/audio/row-boat.mp3',
+    lyrics: [
+      { time: 0, text: 'Row, row, row your boat' },
+      { time: 4, text: 'Gently down the stream' },
+      { time: 8, text: 'Merrily, merrily, merrily, merrily' },
+      { time: 12, text: 'Life is but a dream' },
+    ],
+  },
+  {
+    id: 'baa-sheep',
+    title: 'Baa Baa Black Sheep',
+    emoji: '🐑',
+    category: 'Classic',
+    duration: '1:30',
+    audioSrc: '/audio/baa-sheep.mp3',
+    lyrics: [
+      { time: 0, text: 'Baa, baa, black sheep, have you any wool?' },
+      { time: 6, text: 'Yes sir, yes sir, three bags full' },
+      { time: 12, text: 'One for the master, one for the dame' },
+      { time: 18, text: 'And one for the little boy who lives down the lane' },
+    ],
+  },
+  {
+    id: 'itsy-bitsy',
+    title: 'Itsy Bitsy Spider',
+    emoji: '🕷️',
+    category: 'Action',
+    duration: '1:30',
+    audioSrc: '/audio/itsy-bitsy.mp3',
+    lyrics: [
+      { time: 0, text: 'The itsy bitsy spider climbed up the water spout' },
+      { time: 6, text: 'Down came the rain and washed the spider out' },
+      { time: 12, text: 'Out came the sun and dried up all the rain' },
+      { time: 18, text: 'And the itsy bitsy spider climbed up the spout again' },
+    ],
+  },
+  {
+    id: 'head-shoulders',
+    title: 'Head Shoulders Knees and Toes',
+    emoji: '🧍',
+    category: 'Action',
+    duration: '2:00',
+    audioSrc: '/audio/head-shoulders.mp3',
+    lyrics: [
+      { time: 0, text: 'Head, shoulders, knees and toes, knees and toes' },
+      { time: 6, text: 'Head, shoulders, knees and toes, knees and toes' },
+      { time: 12, text: 'And eyes and ears and mouth and nose' },
+      { time: 18, text: 'Head, shoulders, knees and toes, knees and toes' },
+    ],
+  },
+  {
+    id: 'happy-birthday',
+    title: 'Happy Birthday',
+    emoji: '🎂',
+    category: 'Celebration',
+    duration: '1:30',
+    audioSrc: '/audio/happy-birthday.mp3',
+    lyrics: [
+      { time: 0, text: 'Happy birthday to you' },
+      { time: 5, text: 'Happy birthday to you' },
+      { time: 10, text: 'Happy birthday dear friend' },
+      { time: 15, text: 'Happy birthday to you' },
+    ],
+  },
+  {
+    id: 'jingle-bells',
+    title: 'Jingle Bells',
+    emoji: '🔔',
+    category: 'Holiday',
+    duration: '3:00',
+    audioSrc: '/audio/jingle-bells.mp3',
+    lyrics: [
+      { time: 0, text: 'Jingle bells, jingle bells, jingle all the way' },
+      { time: 8, text: 'Oh, what fun it is to ride in a one-horse open sleigh' },
+      { time: 16, text: 'Jingle bells, jingle bells, jingle all the way' },
+      { time: 24, text: 'Oh, what fun it is to ride in a one-horse open sleigh' },
+      { time: 32, text: 'Dashing through the snow, in a one-horse open sleigh' },
+      { time: 40, text: 'O\'er the fields we go, laughing all the way' },
+    ],
+  },
+  {
+    id: 'humpty',
+    title: 'Humpty Dumpty',
+    emoji: '🥚',
+    category: 'Classic',
+    duration: '1:15',
+    audioSrc: '/audio/humpty.mp3',
+    lyrics: [
+      { time: 0, text: 'Humpty Dumpty sat on a wall' },
+      { time: 4, text: 'Humpty Dumpty had a great fall' },
+      { time: 8, text: 'All the king\'s horses and all the king\'s men' },
+      { time: 14, text: 'Couldn\'t put Humpty together again' },
+    ],
+  },
+  {
+    id: 'rain-rain',
+    title: 'Rain Rain Go Away',
+    emoji: '🌧️',
+    category: 'Weather',
+    duration: '1:45',
+    audioSrc: '/audio/rain-rain.mp3',
+    lyrics: [
+      { time: 0, text: 'Rain, rain, go away' },
+      { time: 4, text: 'Come again another day' },
+      { time: 8, text: 'Little children want to play' },
+      { time: 12, text: 'Rain, rain, go away' },
+      { time: 16, text: 'Rain, rain, go away' },
+      { time: 20, text: 'Come again another day' },
+      { time: 24, text: 'All the children want to play' },
+      { time: 28, text: 'Rain, rain, go away' },
+    ],
+  },
+  {
+    id: 'five-monkeys',
+    title: 'Five Little Monkeys',
+    emoji: '🐵',
+    category: 'Counting',
+    duration: '2:30',
+    audioSrc: '/audio/five-monkeys.mp3',
+    lyrics: [
+      { time: 0, text: 'Five little monkeys jumping on the bed' },
+      { time: 6, text: 'One fell off and bumped his head' },
+      { time: 12, text: 'Mama called the doctor and the doctor said' },
+      { time: 18, text: 'No more monkeys jumping on the bed!' },
+      { time: 24, text: 'Four little monkeys jumping on the bed...' },
+    ],
+  },
+]

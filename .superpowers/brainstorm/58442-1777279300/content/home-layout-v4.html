@@ -1,0 +1,161 @@
+<h2>首页 &amp; 导航设计 v4</h2>
+<p class="subtitle">年龄分级 — 身高比例 + 幼儿园洋气发型</p>
+
+<div class="section">
+  <h3>年龄分级体系（身高逐级+1/3）</h3>
+  <div class="cards" style="grid-template-columns: repeat(3, 1fr);">
+
+    <!-- 幼儿园（基准身高） -->
+    <div class="card" style="border-left: 4px solid #4CAF50;">
+      <div style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border-radius:8px 8px 0 0;padding:16px 16px 0;text-align:center;min-height:180px;display:flex;align-items:flex-end;justify-content:center;">
+        <svg viewBox="0 0 120 120" width="110" height="150" style="display:block;">
+          <!-- 基准身高 ~71px -->
+          <!-- 洋气发型：蓬松波波头 + 蝴蝶结 -->
+          <defs>
+            <linearGradient id="hairGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8D6E63"/>
+              <stop offset="100%" stop-color="#5D4037"/>
+            </linearGradient>
+          </defs>
+          <!-- 蓬松头发 -->
+          <ellipse cx="60" cy="37" rx="26" ry="20" fill="url(#hairGrad)"/>
+          <!-- 刘海 -->
+          <path d="M36 38 Q38 28 44 30 Q50 26 56 30 Q62 24 68 30 Q74 26 80 30 Q84 28 84 38" fill="url(#hairGrad)"/>
+          <!-- 蝴蝶结（左侧） -->
+          <path d="M36 30 L28 25 L28 35 Z" fill="#E91E63"/>
+          <circle cx="36" cy="30" r="3" fill="#AD1457"/>
+          <!-- 蝴蝶结（右侧） -->
+          <path d="M84 30 L92 25 L92 35 Z" fill="#E91E63"/>
+          <circle cx="84" cy="30" r="3" fill="#AD1457"/>
+          <!-- 脸 -->
+          <ellipse cx="60" cy="42" rx="20" ry="18" fill="#FFCCBC"/>
+          <!-- 眼睛（大眼可爱） -->
+          <ellipse cx="51" cy="40" rx="4" ry="5" fill="#333"/>
+          <ellipse cx="69" cy="40" rx="4" ry="5" fill="#333"/>
+          <circle cx="52" cy="38" r="1.5" fill="#fff"/>
+          <circle cx="70" cy="38" r="1.5" fill="#fff"/>
+          <!-- 腮红 -->
+          <ellipse cx="44" cy="48" rx="4" ry="2.5" fill="#FFAB91" opacity="0.5"/>
+          <ellipse cx="76" cy="48" rx="4" ry="2.5" fill="#FFAB91" opacity="0.5"/>
+          <!-- 微笑 -->
+          <path d="M52 50 Q60 56 68 50" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+          <!-- 身体 -->
+          <rect x="44" y="62" width="32" height="24" rx="8" fill="#66BB6A"/>
+          <!-- 小手 -->
+          <circle cx="40" cy="72" r="5" fill="#FFCCBC"/>
+          <circle cx="80" cy="72" r="5" fill="#FFCCBC"/>
+          <!-- 腿 -->
+          <rect x="46" y="86" width="10" height="12" rx="4" fill="#FFCCBC"/>
+          <rect x="64" y="86" width="10" height="12" rx="4" fill="#FFCCBC"/>
+          <!-- 鞋子 -->
+          <ellipse cx="50" cy="99" rx="8" ry="4" fill="#81C784"/>
+          <ellipse cx="70" cy="99" rx="8" ry="4" fill="#81C784"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <h3>🌱 幼儿园 (3-6岁)</h3>
+        <p>字母认读 + 简单儿歌 + 基础单词</p>
+        <p style="font-size:0.85em;color:#666;">以听为主，大量图片+动画</p>
+      </div>
+    </div>
+
+    <!-- 小学（+1/3身高） -->
+    <div class="card" style="border-left: 4px solid #2196F3;">
+      <div style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB);border-radius:8px 8px 0 0;padding:16px 16px 0;text-align:center;min-height:180px;display:flex;align-items:flex-end;justify-content:center;">
+        <svg viewBox="0 0 120 120" width="110" height="150" style="display:block;">
+          <!-- 身高 ~95px（比幼儿园高1/3） -->
+          <!-- 头发 -->
+          <path d="M34 32 Q36 16 60 14 Q84 16 86 32" fill="#333"/>
+          <path d="M34 32 Q34 24 42 26" fill="#333"/>
+          <path d="M86 32 Q86 24 78 26" fill="#333"/>
+          <!-- 脸 -->
+          <ellipse cx="60" cy="36" rx="20" ry="18" fill="#FFCCBC"/>
+          <!-- 眼睛 -->
+          <ellipse cx="51" cy="34" rx="3.5" ry="4" fill="#333"/>
+          <ellipse cx="69" cy="34" rx="3.5" ry="4" fill="#333"/>
+          <circle cx="52" cy="32" r="1.5" fill="#fff"/>
+          <circle cx="70" cy="32" r="1.5" fill="#fff"/>
+          <!-- 微笑 -->
+          <path d="M52 44 Q60 52 68 44" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+          <!-- 身体（校服，更长） -->
+          <rect x="42" y="54" width="36" height="32" rx="6" fill="#42A5F5"/>
+          <!-- 衣领 -->
+          <path d="M54 54 L60 62 L66 54" fill="none" stroke="#fff" stroke-width="2"/>
+          <!-- 红领巾 -->
+          <path d="M56 60 L52 72 L58 64 L64 72 Z" fill="#EF5350"/>
+          <!-- 手 -->
+          <circle cx="38" cy="68" r="5" fill="#FFCCBC"/>
+          <circle cx="82" cy="68" r="5" fill="#FFCCBC"/>
+          <!-- 腿（更长） -->
+          <rect x="44" y="86" width="12" height="16" rx="4" fill="#FFCCBC"/>
+          <rect x="64" y="86" width="12" height="16" rx="4" fill="#FFCCBC"/>
+          <!-- 鞋子 -->
+          <ellipse cx="50" cy="103" rx="9" ry="4" fill="#1565C0"/>
+          <ellipse cx="70" cy="103" rx="9" ry="4" fill="#1565C0"/>
+          <!-- 书本 -->
+          <rect x="10" y="70" width="18" height="24" rx="2" fill="#FFA726"/>
+          <line x1="18" y1="70" x2="18" y2="94" stroke="#E65100" stroke-width="0.5"/>
+          <rect x="12" y="74" width="14" height="2" fill="#fff" opacity="0.5"/>
+          <rect x="12" y="80" width="14" height="2" fill="#fff" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <h3>📚 小学 (6-12岁)</h3>
+        <p>音标 + 单词跟读 + 儿歌 + 简单美文 + AI对话</p>
+        <p style="font-size:0.85em;color:#666;">开始系统学习，跟读+评测</p>
+      </div>
+    </div>
+
+    <!-- 初中（比小学再+1/3） -->
+    <div class="card" style="border-left: 4px solid #FF9800;">
+      <div style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border-radius:8px 8px 0 0;padding:16px 16px 0;text-align:center;min-height:180px;display:flex;align-items:flex-end;justify-content:center;">
+        <svg viewBox="0 0 120 120" width="110" height="150" style="display:block;">
+          <!-- 身高 ~105px（比小学高1/3） -->
+          <!-- 偏分刘海发型 -->
+          <path d="M34 28 Q36 10 60 8 Q84 10 86 28" fill="#333"/>
+          <path d="M38 28 Q40 14 50 16 Q52 14 60 12 Q70 14 72 16" fill="#333"/>
+          <!-- 脸 -->
+          <ellipse cx="60" cy="32" rx="20" ry="18" fill="#FFCCBC"/>
+          <!-- 眼睛（成熟） -->
+          <ellipse cx="51" cy="30" rx="3" ry="3" fill="#333"/>
+          <ellipse cx="69" cy="30" rx="3" ry="3" fill="#333"/>
+          <!-- 自信微笑 -->
+          <path d="M50 40 Q60 50 70 40" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+          <!-- 身体（卫衣，最长） -->
+          <rect x="40" y="50" width="40" height="36" rx="6" fill="#EF5350"/>
+          <!-- 卫衣帽子 -->
+          <path d="M40 50 Q40 42 48 42 L72 42 Q80 42 80 50" fill="#C62828"/>
+          <!-- 手插口袋 -->
+          <circle cx="36" cy="64" r="5" fill="#FFCCBC"/>
+          <circle cx="84" cy="64" r="5" fill="#FFCCBC"/>
+          <!-- 裤子/腿 -->
+          <rect x="42" y="86" width="14" height="18" rx="4" fill="#455A64"/>
+          <rect x="64" y="86" width="14" height="18" rx="4" fill="#455A64"/>
+          <!-- 鞋子 -->
+          <ellipse cx="49" cy="105" rx="10" ry="4" fill="#333"/>
+          <ellipse cx="71" cy="105" rx="10" ry="4" fill="#333"/>
+          <!-- 耳机 -->
+          <path d="M36 24 Q22 24 22 38 L22 46" fill="none" stroke="#666" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M84 24 Q98 24 98 38 L98 46" fill="none" stroke="#666" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="22" cy="50" r="5" fill="#666"/>
+          <circle cx="98" cy="50" r="5" fill="#666"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <h3>🎯 初中 (12-15岁)</h3>
+        <p>进阶单词 + 深度美文 + AI自由对话</p>
+        <p style="font-size:0.85em;color:#666;">侧重阅读量和口语输出</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="border-top: 1px solid #ddd; margin: 24px 0;"></div>
+<p>更新内容：</p>
+<ul>
+  <li><strong>幼儿园</strong>：蓬松波波头 + 粉色蝴蝶结，洋气可爱</li>
+  <li><strong>小学</strong>：身高比幼儿园高1/3，腿和身体都拉长了，校服+书本</li>
+  <li><strong>初中</strong>：比小学再高1/3，整体更修长，卫衣+耳机</li>
+</ul>
+<p>这个形象可以吗？可以的话我开始逐个模块设计。</p>

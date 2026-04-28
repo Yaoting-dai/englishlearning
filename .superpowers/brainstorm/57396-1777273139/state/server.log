@@ -1,0 +1,5 @@
+{"type":"server-started","port":51028,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:51028","screen_dir":"/Users/yaoting/Documents/Coding_Projects/Learn English/.superpowers/brainstorm/57396-1777273139/content","state_dir":"/Users/yaoting/Documents/Coding_Projects/Learn English/.superpowers/brainstorm/57396-1777273139/state"}
+{"type":"screen-added","file":"/Users/yaoting/Documents/Coding_Projects/Learn English/.superpowers/brainstorm/57396-1777273139/content/approaches.html"}
+{"type":"screen-updated","file":"/Users/yaoting/Documents/Coding_Projects/Learn English/.superpowers/brainstorm/57396-1777273139/content/approaches.html"}
+{"type":"screen-added","file":"/Users/yaoting/Documents/Coding_Projects/Learn English/.superpowers/brainstorm/57396-1777273139/content/architecture.html"}
+{"type":"server-stopped","reason":"idle timeout"}
