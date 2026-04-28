@@ -18,8 +18,9 @@ export default function LettersPage() {
   }
 
   const handleSpeak = () => {
-    speak(`${letter.upper} ${letter.lower}, ${letter.word}`)
+    speak(`${letter.upper} ${letter.lower}`)
     markLetterLearned(letter.id)
+    setTimeout(() => speak(letter.word), 1200)
   }
 
   return (
