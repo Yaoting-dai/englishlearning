@@ -26,8 +26,8 @@ export function useSpeech() {
       ? voices.find(v => v.name.includes(saved))
       : null
     const matched = preferred
-      || voices.find(v => v.name.includes('Flo'))
-      || voices.find(v => ['Samantha', 'Karen', 'Kathy', 'Sandy', 'Shelley', 'Ava', 'Allison'].some(n => v.name.includes(n)))
+      || voices.find(v => v.name.includes('Samantha'))
+      || voices.find(v => ['Flo', 'Karen', 'Kathy', 'Sandy', 'Shelley', 'Ava', 'Allison'].some(n => v.name.includes(n)))
       || voices.find(v => v.lang.startsWith('en-US'))
     if (matched) utterance.voice = matched
     if (onEnd) utterance.onend = onEnd

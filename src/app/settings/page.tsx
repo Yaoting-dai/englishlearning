@@ -9,10 +9,10 @@ const levels: AgeLevel[] = ['kindergarten', 'elementary', 'middle']
 
 export default function SettingsPage() {
   const { level, setLevel } = useAgeLevel()
-  const [currentVoice, setCurrentVoice] = useState('Flo')
+  const [currentVoice, setCurrentVoice] = useState('Samantha')
 
   useEffect(() => {
-    setCurrentVoice(getSavedVoice() || 'Flo')
+    setCurrentVoice(getSavedVoice() || 'Samantha')
   }, [])
 
   const handleVoiceChange = (id: string) => {
