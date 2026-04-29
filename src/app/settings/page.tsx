@@ -1,24 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAgeLevel, levelInfo, AgeLevel } from '@/contexts/AgeLevelContext'
-import { voiceOptions, getSavedVoice, saveVoice } from '@/data/voices'
+import { useProgress } from '@/hooks/useProgress'
 import Image from 'next/image'
 
 const levels: AgeLevel[] = ['kindergarten', 'elementary', 'middle']
 
 export default function SettingsPage() {
   const { level, setLevel } = useAgeLevel()
-  const [currentVoice, setCurrentVoice] = useState('Samantha')
-
-  useEffect(() => {
-    setCurrentVoice(getSavedVoice() || 'Samantha')
-  }, [])
-
-  const handleVoiceChange = (id: string) => {
-    saveVoice(id)
-    setCurrentVoice(id)
-  }
+  const { resetProgress } = useProgress()
+  const [showConfirm, setShowConfirm] = useState(false)
 
   return (
     <div className="p-6">
@@ -46,31 +38,31 @@ export default function SettingsPage() {
         })}
       </div>
 
-      <h2 className="text-lg font-semibold mb-4 text-gray-700">🎙️ 选择朗读音色</h2>
-      <div className="grid grid-cols-1 gap-3">
-        {voiceOptions.map(v => {
-          const isActive = currentVoice === v.id
-          return (
-            <button key={v.id} onClick={() => handleVoiceChange(v.id)}
-              className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
-                isActive ? 'border-pink-500 bg-pink-50' : 'border-gray-200 bg-white'
-              }`}>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${
-                isActive ? 'bg-pink-500 text-white' : 'bg-gray-100'
-              }`}>
-                {isActive ? '🎤' : '🔊'}
-              </div>
-              <div className="text-left flex-1">
-                <div className="text-lg font-bold">{v.label}</div>
-                <div className="text-sm text-gray-500">{v.description}</div>
-              </div>
-              {isActive && (
-                <span className="text-xs text-pink-500 font-medium bg-pink-100 px-2 py-1 rounded-full">当前</span>
-              )}
+      <h2 className="text-lg font-semibold mb-4 text-gray-700">🗑️ 学习记录</h2>
+      {!showConfirm ? (
+        <button onClick={() => setShowConfirm(true)}
+          className="w-full p-4 rounded-2xl border-2 border-red-200 bg-white flex items-center gap-4 hover:bg-red-50 transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center text-2xl">🗑️</div>
+          <div className="text-left flex-1">
+            <div className="text-lg font-bold text-red-500">重置学习记录</div>
+            <div className="text-sm text-gray-500">清除所有学习进度数据</div>
+          </div>
+        </button>
+      ) : (
+        <div className="p-4 rounded-2xl border-2 border-red-300 bg-red-50">
+          <p className="text-sm text-red-600 font-medium mb-3">确定要清除所有学习记录吗？此操作不可撤销。</p>
+          <div className="flex gap-3">
+            <button onClick={() => { resetProgress(); setShowConfirm(false) }}
+              className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 active:scale-95 transition-transform">
+              确认清除
             </button>
-          )
-        })}
-      </div>
+            <button onClick={() => setShowConfirm(false)}
+              className="flex-1 py-3 bg-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-300 active:scale-95 transition-transform">
+              取消
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
