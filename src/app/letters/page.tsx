@@ -7,6 +7,15 @@ import BigButton from '@/components/BigButton'
 import { useSpeech } from '@/hooks/useSpeech'
 import { useProgress } from '@/hooks/useProgress'
 
+// TTS-friendly letter name pronunciations
+const letterNames: Record<string, string> = {
+  'A': 'Ay', 'B': 'Bee', 'C': 'See', 'D': 'Dee', 'E': 'Ee',
+  'F': 'Ef', 'G': 'Gee', 'H': 'Aych', 'I': 'Eye', 'J': 'Jay',
+  'K': 'Kay', 'L': 'El', 'M': 'Em', 'N': 'En', 'O': 'Oh',
+  'P': 'Pee', 'Q': 'Kyoo', 'R': 'Ar', 'S': 'Ess', 'T': 'Tee',
+  'U': 'Yoo', 'V': 'Vee', 'W': 'Double-yoo', 'X': 'Eks', 'Y': 'Wye', 'Z': 'Zee',
+}
+
 export default function LettersPage() {
   const [index, setIndex] = useState(0)
   const [feedback, setFeedback] = useState('')
@@ -20,7 +29,7 @@ export default function LettersPage() {
 
   const handleSpeak = () => {
     setFeedback('')
-    speak(letter.upper)
+    speak(letterNames[letter.upper])
     markLetterLearned(letter.id)
     setTimeout(() => speak(letter.word), 1200)
   }
