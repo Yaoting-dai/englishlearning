@@ -20,7 +20,7 @@ export default function LettersPage() {
 
   const handleSpeak = () => {
     setFeedback('')
-    speak(`Letter ${letter.upper}`)
+    speak(letter.upper)
     markLetterLearned(letter.id)
     setTimeout(() => speak(letter.word), 1200)
   }
@@ -50,10 +50,10 @@ export default function LettersPage() {
             <div className="text-3xl font-bold text-orange-500 mt-1">{letter.lower}</div>
             <div className="text-base text-gray-500 mt-2">{letter.phonetic}</div>
             <div className="flex items-center justify-center gap-3 mt-5 bg-white/60 rounded-2xl p-4 mx-4">
-              <span className="text-5xl">{letter.emoji}</span>
-              <div className="text-left">
-                <div className="text-2xl font-bold">{letter.word}</div>
-                <div className="text-sm text-gray-500">{letter.phonetic}</div>
+              <span className="text-5xl shrink-0">{letter.emoji}</span>
+              <div className="text-left min-w-0">
+                <div className="text-2xl font-bold break-words">{letter.word}</div>
+                <div className="text-sm text-gray-500 break-words">{letter.phonetic}</div>
               </div>
             </div>
           </div>

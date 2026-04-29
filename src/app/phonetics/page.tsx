@@ -64,8 +64,7 @@ export default function PhoneticsPage() {
               <BigButton icon="🔊" label="听发音" color="bg-green-500"
                 onClick={() => {
                   const sound = soundMap[detail.symbol] || detail.symbol
-                  speak(`${sound}`, 0.65)
-                  setTimeout(() => speak(detail.examples[0].word, 0.75), 1000)
+                  speak(sound, 0.65)
                 }} />
               <BigButton icon="🎤" label="跟读" color="bg-blue-500" />
             </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 
 export interface PhonemeScore {
   phoneme: string
@@ -15,14 +15,17 @@ export interface PronunciationResult {
 export function usePronunciation() {
   const [result, setResult] = useState<PronunciationResult | null>(null)
   const [isEvaluating, setIsEvaluating] = useState(false)
+  const evaluatingRef = useRef(false)
 
   const evaluate = useCallback(async (word: string): Promise<PronunciationResult | null> => {
+    if (evaluatingRef.current) return null
+    evaluatingRef.current = true
     setIsEvaluating(true)
     setResult(null)
 
-    // Use Web Speech API for actual speech recognition
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) {
+      evaluatingRef.current = false
       setIsEvaluating(false)
       return null
     }
@@ -33,53 +36,42 @@ export function usePronunciation() {
       recognition.continuous = false
       recognition.interimResults = false
 
+      let settled = false
+      const finish = (res: PronunciationResult | null) => {
+        if (settled) return
+        settled = true
+        evaluatingRef.current = false
+        setIsEvaluating(false)
+        if (res) setResult(res)
+        resolve(res)
+      }
+
       recognition.onresult = (event: any) => {
         const spoken = (event.results[0][0].transcript || '').toLowerCase().trim()
         const target = word.toLowerCase()
 
-        // Simple comparison: check if spoken word matches target
         const isCorrect = spoken === target || spoken.includes(target) || target.includes(spoken)
         const score = isCorrect ? 85 + Math.floor(Math.random() * 15) : 40 + Math.floor(Math.random() * 30)
 
-        // Generate per-letter phoneme scores
-        const phonemes: PhonemeScore[] = target.split('').map((ch, i) => ({
+        const phonemes: PhonemeScore[] = target.split('').map((ch) => ({
           phoneme: ch,
-          status: isCorrect && i < target.length / 2
-            ? ('correct' as const)
-            : isCorrect
-              ? ('correct' as const)
-              : i === 0
-                ? ('correct' as const)
-                : (['needs-work', 'incorrect'] as const)[Math.floor(Math.random() * 2)],
+          status: (isCorrect ? 'correct' : 'incorrect') as 'correct' | 'incorrect',
         }))
 
-        const res: PronunciationResult = { score, phonemes }
-        setResult(res)
-        setIsEvaluating(false)
-        resolve(res)
+        finish({ score, phonemes })
       }
 
-      recognition.onerror = () => {
-        setIsEvaluating(false)
-        resolve(null)
-      }
+      recognition.onerror = () => finish(null)
+      recognition.onend = () => finish(null)
 
-      recognition.onend = () => {
-        setIsEvaluating(false)
-      }
-
-      // Timeout after 5 seconds
       setTimeout(() => {
         try { recognition.abort() } catch {}
-        if (isEvaluating) {
-          setIsEvaluating(false)
-          resolve(null)
-        }
+        finish(null)
       }, 5000)
 
       recognition.start()
     })
-  }, [isEvaluating])
+  }, [])
 
   const clearResult = useCallback(() => setResult(null), [])
 

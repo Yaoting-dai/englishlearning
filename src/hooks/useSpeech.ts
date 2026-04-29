@@ -20,8 +20,8 @@ export function useSpeech() {
     utterance.pitch = level === 'kindergarten' ? 1.7 : level === 'elementary' ? 1.5 : 1.3
     // Find Karen voice (user preference), with fallbacks
     const voices = window.speechSynthesis.getVoices()
-    const karenVoice = voices.find(v => v.name.includes('Karen'))
-      || voices.find(v => ['Samantha', 'Flo', 'Kathy', 'Sandy', 'Shelley', 'Ava', 'Allison'].some(n => v.name.includes(n)))
+    const karenVoice = voices.find(v => v.name.includes('Flo'))
+      || voices.find(v => ['Samantha', 'Karen', 'Kathy', 'Sandy', 'Shelley', 'Ava', 'Allison'].some(n => v.name.includes(n)))
       || voices.find(v => v.lang.startsWith('en-US'))
     if (karenVoice) utterance.voice = karenVoice
     if (onEnd) utterance.onend = onEnd

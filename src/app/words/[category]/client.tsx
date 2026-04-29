@@ -79,7 +79,6 @@ export default function WordCategoryClient() {
       <div className="flex justify-center gap-8 mt-6">
         <BigButton icon="🔊" label="听发音" color="bg-green-500" onClick={handleListen} />
         <BigButton icon="🎤" label="跟读" color="bg-blue-500" onClick={handleRecord} />
-        <BigButton icon="🔄" label="重听" color="bg-orange-500" onClick={handleListen} />
       </div>
 
       {isEvaluating && (
