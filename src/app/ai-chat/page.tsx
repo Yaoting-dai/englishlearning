@@ -26,9 +26,12 @@ export default function AIChatPage() {
   const readyForInputRef = useRef(false)
 
   const speechSupported = typeof window !== 'undefined' && (!!((window as any).SpeechRecognition) || !!((window as any).webkitSpeechRecognition))
+  const messagesRef = useRef<Message[]>([])
 
   const addMessage = useCallback((text: string, sender: 'ai' | 'user') => {
-    setMessages(prev => [...prev, { text, sender }])
+    const newMsg = { text, sender }
+    messagesRef.current = [...messagesRef.current, newMsg]
+    setMessages(prev => [...prev, newMsg])
   }, [])
 
   // Start speech recognition (triggered by user tap)
@@ -80,7 +83,12 @@ export default function AIChatPage() {
     setIsLoading(true)
     readyForInputRef.current = false
     try {
-      const reply = await sendMessage([{ role: 'user', content: text.trim() }], level)
+      // Build full conversation history for the API
+      const apiMessages = messagesRef.current.map(m => ({
+        role: (m.sender === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: m.text,
+      }))
+      const reply = await sendMessage(apiMessages, level)
       addMessage(reply, 'ai')
       setAiSpeaking(true)
       speak(reply, undefined, () => {
@@ -124,6 +132,7 @@ export default function AIChatPage() {
     readyForInputRef.current = false
     setStarted(false)
     setMessages([])
+    messagesRef.current = []
   }
 
   // Cleanup on unmount
