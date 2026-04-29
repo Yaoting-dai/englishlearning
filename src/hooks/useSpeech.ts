@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react'
 import { useAgeLevel } from '@/contexts/AgeLevelContext'
+import { getSavedVoice } from '@/data/voices'
 
 export function useSpeech() {
   const { level } = useAgeLevel()
@@ -18,12 +19,17 @@ export function useSpeech() {
     // Child-friendly voice: warm, clear, and engaging
     utterance.rate = rate ?? (level === 'kindergarten' ? 0.75 : level === 'elementary' ? 0.85 : 0.95)
     utterance.pitch = level === 'kindergarten' ? 1.7 : level === 'elementary' ? 1.5 : 1.3
-    // Find Karen voice (user preference), with fallbacks
+    // Use saved voice preference, with fallbacks
     const voices = window.speechSynthesis.getVoices()
-    const karenVoice = voices.find(v => v.name.includes('Flo'))
+    const saved = getSavedVoice()
+    const preferred = saved
+      ? voices.find(v => v.name.includes(saved))
+      : null
+    const matched = preferred
+      || voices.find(v => v.name.includes('Flo'))
       || voices.find(v => ['Samantha', 'Karen', 'Kathy', 'Sandy', 'Shelley', 'Ava', 'Allison'].some(n => v.name.includes(n)))
       || voices.find(v => v.lang.startsWith('en-US'))
-    if (karenVoice) utterance.voice = karenVoice
+    if (matched) utterance.voice = matched
     if (onEnd) utterance.onend = onEnd
     window.speechSynthesis.speak(utterance)
   }, [level])
