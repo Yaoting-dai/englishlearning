@@ -5,6 +5,19 @@ import { phonetics } from '@/data/phonetics'
 import BigButton from '@/components/BigButton'
 import { useSpeech } from '@/hooks/useSpeech'
 
+// TTS-readable approximations for IPA symbols
+const soundMap: Record<string, string> = {
+  'iː': 'ee', 'ɪ': 'ih', 'eɪ': 'ay', 'ɛ': 'eh', 'æ': 'aa',
+  'ɑr': 'ar', 'ɔr': 'or', 'oʊ': 'oh', 'uː': 'oo', 'ʊ': 'uh oo',
+  'ʌ': 'uh', 'ə': 'uh',
+  'b': 'buh', 'p': 'puh', 'd': 'duh', 't': 'tuh',
+  'ɡ': 'guh', 'k': 'kuh', 'f': 'fuh', 'v': 'vuh',
+  's': 'sss', 'z': 'zzz', 'ʃ': 'sh', 'ʒ': 'zh',
+  'm': 'mmm', 'n': 'nnn', 'ŋ': 'ng', 'l': 'lll',
+  'r': 'rrr', 'w': 'wuh', 'j': 'yuh', 'h': 'huh',
+  'θ': 'thhh', 'ð': 'the', 'tʃ': 'ch', 'dʒ': 'juh',
+}
+
 export default function PhoneticsPage() {
   const [tab, setTab] = useState<'vowel' | 'consonant'>('vowel')
   const [selected, setSelected] = useState<string | null>(null)
@@ -49,7 +62,11 @@ export default function PhoneticsPage() {
             <div className="text-base text-gray-500 mt-2">{detail.description}</div>
             <div className="flex justify-center gap-6 mt-6">
               <BigButton icon="🔊" label="听发音" color="bg-green-500"
-                onClick={() => speak(detail.examples[0].word)} />
+                onClick={() => {
+                  const sound = soundMap[detail.symbol] || detail.symbol
+                  speak(`${sound}`, 0.65)
+                  setTimeout(() => speak(detail.examples[0].word, 0.75), 1000)
+                }} />
               <BigButton icon="🎤" label="跟读" color="bg-blue-500" />
             </div>
             <div className="mt-6 space-y-3">

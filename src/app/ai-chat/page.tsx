@@ -20,16 +20,17 @@ export default function AIChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
+  const [aiSpeaking, setAiSpeaking] = useState(false)
   const recognitionRef = useRef<any>(null)
-  const speakingRef = useRef(false)
+  const readyForInputRef = useRef(false)
 
   const addMessage = useCallback((text: string, sender: 'ai' | 'user') => {
     setMessages(prev => [...prev, { text, sender }])
   }, [])
 
-  // Start speech recognition
+  // Start speech recognition (triggered by user tap)
   const startListening = useCallback(() => {
-    if (typeof window === 'undefined') return
+    if (isListening || isLoading) return
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) return
 
@@ -58,12 +59,12 @@ export default function AIChatPage() {
     recognitionRef.current = recognition
     recognition.start()
     setIsListening(true)
-  }, [])
+  }, [isListening, isLoading])
 
   // Stop speech recognition
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop() } catch {}
+      try { recognitionRef.current.abort() } catch {}
       recognitionRef.current = null
     }
     setIsListening(false)
@@ -72,44 +73,46 @@ export default function AIChatPage() {
   // Handle user voice input
   const handleUserSpeech = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return
-    stopListening()
     addMessage(text, 'user')
     setIsLoading(true)
+    readyForInputRef.current = false
     try {
       const reply = await sendMessage([{ role: 'user', content: text }], level)
       addMessage(reply, 'ai')
-      // Speak AI reply, then listen again
-      speakingRef.current = true
+      setAiSpeaking(true)
       speak(reply, undefined, () => {
-        speakingRef.current = false
-        if (started) startListening()
+        setAiSpeaking(false)
+        readyForInputRef.current = true
       })
     } catch {
       const fallback = "That's great! Tell me more! 😊"
       addMessage(fallback, 'ai')
+      setAiSpeaking(true)
       speak(fallback, undefined, () => {
-        speakingRef.current = false
-        if (started) startListening()
+        setAiSpeaking(false)
+        readyForInputRef.current = true
       })
     }
     setIsLoading(false)
-  }, [isLoading, level, speak, addMessage, startListening, stopListening, started])
+  }, [isLoading, level, speak, addMessage])
 
   const handleStart = () => {
     setStarted(true)
+    readyForInputRef.current = false
     const greeting = "Hi there! I'm Elizabeth! Let's learn English together! 🎉"
     addMessage(greeting, 'ai')
-    speakingRef.current = true
+    setAiSpeaking(true)
     speak(greeting, undefined, () => {
-      speakingRef.current = false
-      startListening()
+      setAiSpeaking(false)
+      readyForInputRef.current = true
     })
   }
 
   const handleStop = () => {
     stop()
     stopListening()
-    speakingRef.current = false
+    setAiSpeaking(false)
+    readyForInputRef.current = false
     setStarted(false)
     setMessages([])
   }
@@ -137,7 +140,7 @@ export default function AIChatPage() {
           <div className="text-2xl font-bold text-blue-700">Elizabeth</div>
           <div className="text-base text-gray-400 mt-1">Your AI English Teacher</div>
           <div className="text-sm text-gray-400 mt-4 text-center max-w-xs">
-            🎤 Voice conversation · Speak and I&apos;ll reply!
+            🎤 Tap the mic to speak, Elizabeth will reply!
           </div>
           <div className="mt-8">
             <StartButton onClick={handleStart} />
@@ -168,17 +171,27 @@ export default function AIChatPage() {
             )}
           </div>
 
-          {/* Voice status */}
+          {/* Mic button */}
           <div className="border-t border-gray-100 pt-3 text-center">
             {isListening ? (
-              <div className="flex items-center justify-center gap-2 text-blue-500">
-                <span className="w-3 h-3 bg-blue-500 rounded-full animate-ping" />
-                <span className="text-sm font-medium">🎤 Listening... Speak now</span>
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                  <span className="text-3xl text-white">🎤</span>
+                </div>
+                <span className="text-sm text-red-500 font-medium">Listening...</span>
               </div>
             ) : isLoading ? (
-              <div className="text-sm text-gray-400">⏳ Waiting for Elizabeth...</div>
+              <div className="text-sm text-gray-400 py-4">⏳ Waiting for Elizabeth...</div>
+            ) : aiSpeaking ? (
+              <div className="text-sm text-gray-400 py-4">🔊 Elizabeth is speaking...</div>
             ) : (
-              <div className="text-sm text-gray-400">💬 Elizabeth is listening for you</div>
+              <button onClick={startListening}
+                className="flex flex-col items-center gap-2 mx-auto active:scale-95 transition-transform">
+                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600">
+                  <span className="text-3xl text-white">🎤</span>
+                </div>
+                <span className="text-sm text-blue-500 font-medium">Tap to speak</span>
+              </button>
             )}
           </div>
         </div>

@@ -15,7 +15,6 @@ export default function SongPlayer({ song }: SongPlayerProps) {
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const lyricsRef = useRef<HTMLDivElement>(null)
   const { speak } = useSpeech()
-  const lineRef = useRef(0)
 
   const totalDuration = Math.max(...song.lyrics.map(l => l.time)) + 5
 
@@ -63,6 +62,7 @@ export default function SongPlayer({ song }: SongPlayerProps) {
 
   return (
     <div>
+      {/* Song info */}
       <div className="flex items-center gap-3 mb-5">
         <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-2xl shadow-md">
           {song.emoji}
@@ -73,35 +73,52 @@ export default function SongPlayer({ song }: SongPlayerProps) {
         </div>
       </div>
 
-      <div ref={lyricsRef} className="bg-gray-50 rounded-2xl p-5 h-56 overflow-y-auto mb-4 flex flex-col justify-center">
-        {song.lyrics.map((line, i) => (
-          <div key={i} className={`py-1.5 transition-all duration-300 ${
-            i === currentLine ? 'text-xl font-bold text-pink-600' :
-            i < currentLine ? 'text-sm text-gray-300' : 'text-sm text-gray-500'
-          }`}>
-            {line.text}
-          </div>
-        ))}
-      </div>
-
-      <div className="flex items-center gap-3 mb-4">
-        <span className="text-xs text-gray-400">{Math.floor(progress / 60)}:{String(progress % 60).padStart(2, '0')}</span>
-        <div className="flex-1 h-2 bg-gray-200 rounded-full">
-          <div className="h-full bg-pink-500 rounded-full relative" style={{ width: `${(progress / totalDuration) * 100}%` }}>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-pink-500 rounded-full shadow-md" />
-          </div>
+      {/* Bilibili embed */}
+      {song.bvid && (
+        <div className="mb-4 rounded-2xl overflow-hidden shadow-md aspect-video">
+          <iframe
+            src={`https://player.bilibili.com/player.html?bvid=${song.bvid}&page=1&high_quality=1&danmaku=0`}
+            allowFullScreen
+            className="w-full h-full"
+            style={{ minHeight: '250px' }}
+          />
         </div>
-        <span className="text-xs text-gray-400">{song.duration}</span>
-      </div>
+      )}
 
-      <div className="flex justify-center items-center gap-10">
-        <button className="text-2xl text-gray-400">⏮</button>
-        <button onClick={togglePlay}
-          className="w-16 h-16 bg-pink-500 rounded-full flex items-center justify-center text-white text-3xl shadow-lg active:scale-95 transition-transform">
-          {isPlaying ? '⏸' : '▶'}
-        </button>
-        <button className="text-2xl text-gray-400">⏭</button>
-      </div>
+      {/* Lyrics + TTS playback (fallback when no video) */}
+      {!song.bvid && (
+        <>
+          <div ref={lyricsRef} className="bg-gray-50 rounded-2xl p-5 h-56 overflow-y-auto mb-4 flex flex-col justify-center">
+            {song.lyrics.map((line, i) => (
+              <div key={i} className={`py-1.5 transition-all duration-300 ${
+                i === currentLine ? 'text-xl font-bold text-pink-600' :
+                i < currentLine ? 'text-sm text-gray-300' : 'text-sm text-gray-500'
+              }`}>
+                {line.text}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs text-gray-400">{Math.floor(progress / 60)}:{String(progress % 60).padStart(2, '0')}</span>
+            <div className="flex-1 h-2 bg-gray-200 rounded-full">
+              <div className="h-full bg-pink-500 rounded-full relative" style={{ width: `${(progress / totalDuration) * 100}%` }}>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-pink-500 rounded-full shadow-md" />
+              </div>
+            </div>
+            <span className="text-xs text-gray-400">{song.duration}</span>
+          </div>
+
+          <div className="flex justify-center items-center gap-10">
+            <button className="text-2xl text-gray-400">⏮</button>
+            <button onClick={togglePlay}
+              className="w-16 h-16 bg-pink-500 rounded-full flex items-center justify-center text-white text-3xl shadow-lg active:scale-95 transition-transform">
+              {isPlaying ? '⏸' : '▶'}
+            </button>
+            <button className="text-2xl text-gray-400">⏭</button>
+          </div>
+        </>
+      )}
     </div>
   )
 }

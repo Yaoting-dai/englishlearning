@@ -10,6 +10,7 @@ export interface SongData {
   category: string
   duration: string
   audioSrc: string
+  bvid?: string
   lyrics: SongLine[]
 }
 
@@ -21,6 +22,7 @@ export const songs: SongData[] = [
     category: 'Alphabet',
     duration: '3:45',
     audioSrc: '/audio/abc-song.mp3',
+    bvid: 'BV1TW9dYVEBU',
     lyrics: [
       { time: 0, text: 'A-B-C-D-E-F-G' },
       { time: 5, text: 'H-I-J-K-L-M-N-O-P' },
@@ -37,6 +39,7 @@ export const songs: SongData[] = [
     category: 'Lullaby',
     duration: '2:30',
     audioSrc: '/audio/twinkle.mp3',
+    bvid: 'BV1Bg4y1t7Ah',
     lyrics: [
       { time: 0, text: 'Twinkle, twinkle, little star' },
       { time: 5, text: 'How I wonder what you are' },
@@ -53,6 +56,7 @@ export const songs: SongData[] = [
     category: 'Action',
     duration: '4:15',
     audioSrc: '/audio/wheels.mp3',
+    bvid: 'BV14GdSB9E3y',
     lyrics: [
       { time: 0, text: 'The wheels on the bus go round and round' },
       { time: 8, text: 'Round and round, round and round' },
@@ -71,6 +75,7 @@ export const songs: SongData[] = [
     category: 'Animals',
     duration: '3:30',
     audioSrc: '/audio/old-macdonald.mp3',
+    bvid: 'BV1ro4y1z7Vm',
     lyrics: [
       { time: 0, text: 'Old MacDonald had a farm, E-I-E-I-O' },
       { time: 6, text: 'And on his farm he had a cow, E-I-E-I-O' },
@@ -86,6 +91,7 @@ export const songs: SongData[] = [
     category: 'Classic',
     duration: '2:15',
     audioSrc: '/audio/mary-lamb.mp3',
+    bvid: 'BV1ro4y1z7Vm',
     lyrics: [
       { time: 0, text: 'Mary had a little lamb, little lamb, little lamb' },
       { time: 8, text: 'Mary had a little lamb, its fleece was white as snow' },
@@ -102,6 +108,7 @@ export const songs: SongData[] = [
     category: 'Action',
     duration: '1:45',
     audioSrc: '/audio/row-boat.mp3',
+    bvid: 'BV1ro4y1z7Vm',
     lyrics: [
       { time: 0, text: 'Row, row, row your boat' },
       { time: 4, text: 'Gently down the stream' },
@@ -116,6 +123,7 @@ export const songs: SongData[] = [
     category: 'Classic',
     duration: '1:30',
     audioSrc: '/audio/baa-sheep.mp3',
+    bvid: 'BV12u4y117Ef',
     lyrics: [
       { time: 0, text: 'Baa, baa, black sheep, have you any wool?' },
       { time: 6, text: 'Yes sir, yes sir, three bags full' },
@@ -144,6 +152,7 @@ export const songs: SongData[] = [
     category: 'Action',
     duration: '2:00',
     audioSrc: '/audio/head-shoulders.mp3',
+    bvid: 'BV18K4y1T7NV',
     lyrics: [
       { time: 0, text: 'Head, shoulders, knees and toes, knees and toes' },
       { time: 6, text: 'Head, shoulders, knees and toes, knees and toes' },
@@ -202,6 +211,7 @@ export const songs: SongData[] = [
     category: 'Weather',
     duration: '1:45',
     audioSrc: '/audio/rain-rain.mp3',
+    bvid: 'BV1Bh4y1E7ZH',
     lyrics: [
       { time: 0, text: 'Rain, rain, go away' },
       { time: 4, text: 'Come again another day' },
@@ -220,6 +230,7 @@ export const songs: SongData[] = [
     category: 'Counting',
     duration: '2:30',
     audioSrc: '/audio/five-monkeys.mp3',
+    bvid: 'BV1qV41127Qr',
     lyrics: [
       { time: 0, text: 'Five little monkeys jumping on the bed' },
       { time: 6, text: 'One fell off and bumped his head' },
