@@ -2,16 +2,22 @@
 // Accepts POST with FormData { file: audioBlob }
 // Returns JSON { text: "<transcript>" }
 
-async function callWhisper(audioBuffer: ArrayBuffer, mimeType: string, ai: any): Promise<string> {
-  const bytes = new Uint8Array(audioBuffer)
+async function base64FromBuffer(buf: ArrayBuffer): Promise<string> {
+  const bytes = new Uint8Array(buf)
   let binary = ''
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i])
   }
-  const base64 = btoa(binary)
-  const dataUri = `data:${mimeType};base64,${base64}`
+  return btoa(binary)
+}
 
-  const result = await ai.run('@cf/openai/whisper', { audio: dataUri })
+async function callWhisper(audioBuffer: ArrayBuffer, ai: any): Promise<string> {
+  const base64 = await base64FromBuffer(audioBuffer)
+
+  // whisper-large-v3-turbo has best format support (m4a, mp3, wav, etc.)
+  const result = await ai.run('@cf/openai/whisper-large-v3-turbo', {
+    audio: base64,
+  })
   return result?.text || ''
 }
 
@@ -41,7 +47,7 @@ export async function onRequest(context: { request: Request; env: Record<string,
     // Option 1 (recommended): Cloudflare Workers AI Whisper
     // Requires AI binding in Cloudflare Pages dashboard
     if (env.AI) {
-      const text = await callWhisper(audioBuffer, mimeType, (env as any).AI)
+      const text = await callWhisper(audioBuffer, (env as any).AI)
       return new Response(JSON.stringify({ text }), {
         headers: { 'Content-Type': 'application/json' },
       })
