@@ -24,6 +24,10 @@ export default function AIChatPage() {
   const [speechError, setSpeechError] = useState('')
   const recognitionRef = useRef<any>(null)
   const readyForInputRef = useRef(false)
+  const gotResultRef = useRef(false)
+  const retryCountRef = useRef(0)
+  const stoppedRef = useRef(false)
+  const MAX_RETRIES = 5
 
   const speechSupported = typeof window !== 'undefined' && (!!((window as any).SpeechRecognition) || !!((window as any).webkitSpeechRecognition))
   const messagesRef = useRef<Message[]>([])
@@ -69,58 +73,92 @@ export default function AIChatPage() {
   const startListening = useCallback(() => {
     if (isListening || isLoading) return
     setSpeechError('')
+    gotResultRef.current = false
+    retryCountRef.current = 0
+    stoppedRef.current = false
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) return
 
-    const recognition = new SpeechRecognition()
-    recognition.lang = 'en-US'
-    recognition.continuous = false
-    recognition.interimResults = true
+    const startRecognizer = () => {
+      const recognition = new SpeechRecognition()
+      recognition.lang = 'en-US'
+      recognition.continuous = false
+      recognition.interimResults = true
 
-    recognition.onresult = (event: any) => {
-      const result = event.results[event.results.length - 1]
-      if (result.isFinal) {
-        const transcript = result[0].transcript
-        if (transcript.trim()) {
+      recognition.onresult = (event: any) => {
+        const result = event.results[event.results.length - 1]
+        if (result.isFinal) {
+          const transcript = result[0].transcript
+          if (transcript.trim()) {
+            gotResultRef.current = true
+            retryCountRef.current = MAX_RETRIES // stop retrying
+            recognitionRef.current = null
+            setIsListening(false)
+            handleUserSpeech(transcript.trim())
+          }
+        }
+      }
+
+      recognition.onerror = () => {
+        // On iOS, error fires frequently — retry unless stopped or exceeded limit
+        retryCountRef.current++
+        if (!stoppedRef.current && retryCountRef.current <= MAX_RETRIES) {
+          setTimeout(startRecognizer, 300)
+        } else if (!stoppedRef.current) {
           recognitionRef.current = null
           setIsListening(false)
-          handleUserSpeech(transcript.trim())
+          setSpeechError('语音识别失败，请重试')
+        }
+      }
+
+      recognition.onend = () => {
+        recognitionRef.current = null
+        // If we got a result or user stopped, don't retry
+        if (gotResultRef.current || stoppedRef.current) {
+          if (!gotResultRef.current) setIsListening(false)
+          return
+        }
+        // iOS: onend fires immediately after start without capturing audio.
+        // Retry automatically until we get a result or exceed limit.
+        retryCountRef.current++
+        if (retryCountRef.current <= MAX_RETRIES) {
+          startRecognizer()
+        } else {
+          setIsListening(false)
+          setSpeechError('语音识别失败，请重试')
+        }
+      }
+
+      recognitionRef.current = recognition
+      try {
+        recognition.start()
+      } catch {
+        retryCountRef.current++
+        if (retryCountRef.current <= MAX_RETRIES) {
+          setTimeout(startRecognizer, 300)
+        } else {
+          setIsListening(false)
+          setSpeechError('语音识别启动失败')
         }
       }
     }
 
-    recognition.onerror = () => {
-      recognitionRef.current = null
-      setIsListening(false)
-      setSpeechError('语音识别失败，请重试')
-    }
-
-    recognition.onend = () => {
-      recognitionRef.current = null
-      setIsListening(false)
-    }
-
-    recognitionRef.current = recognition
-    try {
-      recognition.start()
-      setIsListening(true)
-      // Timeout: auto-stop after 15s to prevent getting stuck on iOS
-      setTimeout(() => {
-        if (recognitionRef.current === recognition) {
-          try { recognition.abort() } catch {}
-          recognitionRef.current = null
-          setIsListening(false)
-          setSpeechError('语音识别超时，请重试')
-        }
-      }, 15000)
-    } catch {
-      setIsListening(false)
-      setSpeechError('语音识别启动失败')
-    }
+    startRecognizer()
+    setIsListening(true)
+    // Timeout: auto-stop after 15s to prevent getting stuck on iOS
+    setTimeout(() => {
+      if (!gotResultRef.current) {
+        try { recognitionRef.current?.abort() } catch {}
+        recognitionRef.current = null
+        setIsListening(false)
+        setSpeechError('语音识别超时，请重试')
+      }
+    }, 15000)
   }, [isListening, isLoading, handleUserSpeech])
 
   // Stop speech recognition
   const stopListening = useCallback(() => {
+    stoppedRef.current = true
     if (recognitionRef.current) {
       try { recognitionRef.current.abort() } catch {}
       recognitionRef.current = null
