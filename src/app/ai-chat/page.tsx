@@ -24,6 +24,7 @@ export default function AIChatPage() {
   const [aiSpeaking, setAiSpeaking] = useState(false)
   const [speechError, setSpeechError] = useState('')
   const [isRecording, setIsRecording] = useState(false)
+  const [isAutoMode, setIsAutoMode] = useState(false)
   const recognitionRef = useRef<any>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
@@ -32,6 +33,12 @@ export default function AIChatPage() {
   const retryCountRef = useRef(0)
   const stoppedRef = useRef(false)
   const MAX_RETRIES = 5
+  // Silence detection refs
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const silenceStartRef = useRef<number | null>(null)
+  const animFrameRef = useRef<number | null>(null)
+  const isAutoModeRef = useRef(false)
 
   // iOS detection — webkitSpeechRecognition exists but never captures audio on iOS 17+
   const isIOS = useMemo(() => typeof navigator !== 'undefined' && (
@@ -49,6 +56,7 @@ export default function AIChatPage() {
 
   const messagesRef = useRef<Message[]>([])
   const sendToDoubaoRef = useRef<((text: string) => Promise<void>) | null>(null)
+  const startRecordingRef = useRef<(autoMode: boolean) => Promise<void>>(null as any)
 
   const addMessage = useCallback((text: string, sender: 'ai' | 'user') => {
     const newMsg = { text, sender }
@@ -73,6 +81,10 @@ export default function AIChatPage() {
       speak(reply, undefined, () => {
         setAiSpeaking(false)
         readyForInputRef.current = true
+        // In auto mode, restart recording after AI finishes
+        if (isAutoModeRef.current && startRecordingRef.current) {
+          setTimeout(() => startRecordingRef.current(true), 300)
+        }
       })
     } catch {
       const fallback = "That's great! Tell me more! 😊"
@@ -81,6 +93,10 @@ export default function AIChatPage() {
       speak(fallback, undefined, () => {
         setAiSpeaking(false)
         readyForInputRef.current = true
+        // In auto mode, restart recording after AI finishes
+        if (isAutoModeRef.current && startRecordingRef.current) {
+          setTimeout(() => startRecordingRef.current(true), 300)
+        }
       })
     }
     setIsLoading(false)
@@ -92,10 +108,62 @@ export default function AIChatPage() {
     await sendToDoubao(text.trim())
   }, [isLoading, sendToDoubao])
 
-  // Keep ref in sync with latest sendToDoubao
-  useEffect(() => {
-    sendToDoubaoRef.current = sendToDoubao
-  }, [sendToDoubao])
+  // Keep ref in sync
+  useEffect(() => { sendToDoubaoRef.current = sendToDoubao }, [sendToDoubao])
+
+  // === Silence detection for auto mode ===
+  function startSilenceDetection(stream: MediaStream) {
+    try {
+      const audioContext = new AudioContext()
+      const source = audioContext.createMediaStreamSource(stream)
+      const analyser = audioContext.createAnalyser()
+      analyser.fftSize = 256
+      source.connect(analyser)
+      audioContextRef.current = audioContext
+      analyserRef.current = analyser
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount)
+      silenceStartRef.current = null
+
+      const detect = () => {
+        if (!analyserRef.current || mediaRecorderRef.current?.state !== 'recording') return
+        analyserRef.current.getByteTimeDomainData(dataArray)
+        const max = Math.max.apply(null, Array.from(dataArray))
+        const normalized = Math.abs(max - 128) / 128
+
+        if (normalized < 0.05) {
+          if (!silenceStartRef.current) silenceStartRef.current = Date.now()
+          else if (Date.now() - silenceStartRef.current >= 3000) {
+            silenceStartRef.current = null
+            if (mediaRecorderRef.current?.state === 'recording') {
+              mediaRecorderRef.current.stop()
+            }
+            return
+          }
+        } else {
+          silenceStartRef.current = null
+        }
+        animFrameRef.current = requestAnimationFrame(detect)
+      }
+      detect()
+    } catch {
+      // Silence detection not supported
+    }
+  }
+
+  function stopSilenceDetection() {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current)
+      animFrameRef.current = null
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {})
+      audioContextRef.current = null
+    }
+    analyserRef.current = null
+    silenceStartRef.current = null
+  }
+  // ====================================
 
   // Start speech recognition (triggered by user tap)
   const startListening = useCallback(() => {
@@ -194,11 +262,15 @@ export default function AIChatPage() {
     setIsListening(false)
   }, [])
 
-  // Start recording (iOS fallback — uses getUserMedia + STT API)
-  const startRecording = useCallback(async () => {
+  // Start recording (uses getUserMedia + STT API)
+  const startRecording = useCallback(async (autoMode = false) => {
     if (isRecording || isLoading) return
     setSpeechError('')
     stoppedRef.current = false
+    if (autoMode) {
+      isAutoModeRef.current = true
+      setIsAutoMode(true)
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const mimeType = MediaRecorder.isTypeSupported('audio/mp4')
@@ -212,7 +284,7 @@ export default function AIChatPage() {
       }
 
       mediaRecorder.onstop = async () => {
-        // Release mic
+        stopSilenceDetection()
         stream.getTracks().forEach(t => t.stop())
         setIsRecording(false)
         const blob = new Blob(audioChunksRef.current, { type: mimeType })
@@ -226,23 +298,42 @@ export default function AIChatPage() {
           } else {
             setSpeechError('未识别到语音，请重试')
             setIsLoading(false)
+            // Retry recording in auto mode
+            if (isAutoModeRef.current) {
+              setTimeout(() => startRecording(true), 500)
+            }
           }
         } catch {
           setSpeechError('语音识别失败，请重试')
           setIsLoading(false)
+          // Retry recording in auto mode
+          if (isAutoModeRef.current) {
+            setTimeout(() => startRecording(true), 1000)
+          }
         }
       }
 
       mediaRecorderRef.current = mediaRecorder
       mediaRecorder.start()
       setIsRecording(true)
+
+      // Start silence detection for auto mode
+      if (autoMode) {
+        startSilenceDetection(stream)
+      }
     } catch {
       setSpeechError('无法访问麦克风，请允许麦克风权限')
+      setIsAutoMode(false)
+      isAutoModeRef.current = false
     }
   }, [isRecording, isLoading])
 
+  // Sync startRecording ref for use in earlier callbacks
+  useEffect(() => { startRecordingRef.current = startRecording }, [startRecording])
+
   // Stop recording
   const stopRecording = useCallback(() => {
+    stopSilenceDetection()
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop()
       mediaRecorderRef.current = null
@@ -258,6 +349,10 @@ export default function AIChatPage() {
     speak(greeting, undefined, () => {
       setAiSpeaking(false)
       readyForInputRef.current = true
+      // Auto-start recording after greeting if STT configured
+      if (recordingSupported && isSTTConfigured()) {
+        startRecording(true)
+      }
     })
   }
 
@@ -265,9 +360,12 @@ export default function AIChatPage() {
     stop()
     stopListening()
     stopRecording()
+    stopSilenceDetection()
     setAiSpeaking(false)
     readyForInputRef.current = false
     setStarted(false)
+    setIsAutoMode(false)
+    isAutoModeRef.current = false
     setMessages([])
     messagesRef.current = []
   }
@@ -278,6 +376,7 @@ export default function AIChatPage() {
       stop()
       stopListening()
       stopRecording()
+      stopSilenceDetection()
     }
   }, [stop, stopListening, stopRecording])
 
@@ -332,15 +431,25 @@ export default function AIChatPage() {
             {speechError && (
               <p className="text-xs text-red-500 mb-2">{speechError}</p>
             )}
+            {isAutoMode && !isRecording && !isLoading && !aiSpeaking && (
+              <div className="text-sm text-green-500 py-4">🎤 Listening... waiting for speech</div>
+            )}
             {isRecording ? (
               <div className="flex flex-col items-center gap-2 py-4">
-                <button onClick={stopRecording}
-                  className="flex flex-col items-center gap-2 mx-auto active:scale-95 transition-transform">
+                <div className="flex flex-col items-center gap-2 mx-auto">
                   <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                    <span className="text-3xl text-white">⏹</span>
+                    <span className="text-3xl text-white">🎤</span>
                   </div>
-                  <span className="text-sm text-red-500 font-medium">Recording... tap to stop</span>
-                </button>
+                  <span className="text-sm text-red-500 font-medium">
+                    {isAutoMode ? 'Recording... auto-submit on silence' : 'Recording...'}
+                  </span>
+                  {!isAutoMode && (
+                    <button onClick={stopRecording}
+                      className="text-xs text-gray-500 underline mt-1">
+                      Tap to stop
+                    </button>
+                  )}
+                </div>
               </div>
             ) : isListening ? (
               <div className="flex flex-col items-center gap-2 py-4">
@@ -353,6 +462,8 @@ export default function AIChatPage() {
               <div className="text-sm text-gray-400 py-4">⏳ {recordingSupported ? 'Transcribing...' : 'Waiting for Elizabeth...'}</div>
             ) : aiSpeaking ? (
               <div className="text-sm text-gray-400 py-4">🔊 Elizabeth is speaking...</div>
+            ) : isAutoMode ? (
+              <div className="text-sm text-gray-400 py-4">⏳ Preparing microphone...</div>
             ) : speechSupported ? (
               <button onClick={startListening}
                 className="flex flex-col items-center gap-2 mx-auto active:scale-95 transition-transform">
@@ -362,7 +473,7 @@ export default function AIChatPage() {
                 <span className="text-sm text-blue-500 font-medium">Tap to speak</span>
               </button>
             ) : recordingSupported && isSTTConfigured() ? (
-              <button onClick={startRecording}
+              <button onClick={() => startRecording(false)}
                 className="flex flex-col items-center gap-2 mx-auto active:scale-95 transition-transform">
                 <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600">
                   <span className="text-3xl text-white">🎤</span>
