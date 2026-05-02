@@ -2,63 +2,17 @@
 // Accepts POST with FormData { file: audioBlob }
 // Returns JSON { text: "<transcript>" }
 
-async function callVolcengineASR(
-  audioBuffer: ArrayBuffer,
-  mimeType: string,
-  apiUrl: string,
-  apiKey: string,
-): Promise<string> {
-  // 火山引擎语音识别 (openspeech.bytedance.com) HTTP API
-  // Docs: https://www.volcengine.com/docs/6561/341796
-  const formData = new FormData()
-  formData.append(
-    'audio',
-    new File([audioBuffer], 'recording.m4a', { type: mimeType || 'audio/mp4' }),
-  )
-  formData.append('cluster', 'volc_audio_v2') // uses the user's configured ASR engine
-
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: { Authorization: `Bearer;access_token=${apiKey}` },
-    body: formData,
-  })
-
-  if (!response.ok) {
-    const errText = await response.text()
-    console.error('Volcengine ASR error:', response.status, errText)
-    throw new Error(`语音识别服务错误 (${response.status})`)
+async function callWhisper(audioBuffer: ArrayBuffer, mimeType: string, ai: any): Promise<string> {
+  const bytes = new Uint8Array(audioBuffer)
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i])
   }
+  const base64 = btoa(binary)
+  const dataUri = `data:${mimeType};base64,${base64}`
 
-  const data = await response.json()
-  // Response format: { payload: { text: "..." } } or { text: "..." } or { result: "..." }
-  return data?.payload?.text || data?.text || data?.result || ''
-}
-
-async function callOpenAICompatibleASR(
-  audioBuffer: ArrayBuffer,
-  mimeType: string,
-  apiUrl: string,
-  apiKey: string,
-): Promise<string> {
-  const formData = new FormData()
-  formData.append('file', new File([audioBuffer], 'recording.m4a', { type: mimeType }))
-  formData.append('model', 'whisper-1')
-  formData.append('language', 'en')
-
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: formData,
-  })
-
-  if (!response.ok) {
-    const errText = await response.text()
-    console.error('STT API error:', response.status, errText)
-    throw new Error(`语音识别服务错误 (${response.status})`)
-  }
-
-  const data = await response.json()
-  return data?.text || ''
+  const result = await ai.run('@cf/openai/whisper', { audio: dataUri })
+  return result?.text || ''
 }
 
 export async function onRequest(context: { request: Request; env: Record<string, string> }) {
@@ -84,45 +38,48 @@ export async function onRequest(context: { request: Request; env: Record<string,
     const audioBuffer = await file.arrayBuffer()
     const mimeType = file.type || 'audio/mp4'
 
-    // Option 1: Cloudflare Workers AI Whisper
+    // Option 1 (recommended): Cloudflare Workers AI Whisper
+    // Requires AI binding in Cloudflare Pages dashboard
     if (env.AI) {
-      const bytes = new Uint8Array(audioBuffer)
-      let binary = ''
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i])
-      }
-      const base64 = btoa(binary)
-      const dataUri = `data:${mimeType};base64,${base64}`
-
-      const result = await (env.AI as any).run('@cf/openai/whisper', { audio: dataUri })
-      return new Response(JSON.stringify({ text: result?.text || '' }), {
-        headers: { 'Content-Type': 'application/json' },
-      })
-    }
-
-    // Option 2: HTTP-based STT API
-    const sttUrl = env.STT_API_URL || env.NEXT_PUBLIC_STT_ENDPOINT
-    const sttKey = env.STT_API_KEY || env.NEXT_PUBLIC_STT_API_KEY
-
-    if (sttUrl && sttKey) {
-      let text: string
-
-      if (sttUrl.includes('openspeech.bytedance.com')) {
-        // 火山引擎语音识别
-        text = await callVolcengineASR(audioBuffer, mimeType, sttUrl, sttKey)
-      } else {
-        // OpenAI-compatible (Azure, OpenAI, etc.)
-        text = await callOpenAICompatibleASR(audioBuffer, mimeType, sttUrl, sttKey)
-      }
-
+      const text = await callWhisper(audioBuffer, mimeType, (env as any).AI)
       return new Response(JSON.stringify({ text }), {
         headers: { 'Content-Type': 'application/json' },
       })
     }
 
-    // No backend configured
+    // Option 2: OpenAI-compatible API (used when AI binding is unavailable)
+    const sttUrl = env.STT_API_URL || env.NEXT_PUBLIC_STT_ENDPOINT
+    const sttKey = env.STT_API_KEY || env.NEXT_PUBLIC_STT_API_KEY
+    if (sttUrl && sttKey) {
+      const fd = new FormData()
+      fd.append('file', new File([audioBuffer], 'recording.m4a', { type: mimeType }))
+      fd.append('model', 'whisper-1')
+      fd.append('language', 'en')
+
+      const response = await fetch(sttUrl, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${sttKey}` },
+        body: fd,
+      })
+
+      if (!response.ok) {
+        const errText = await response.text()
+        console.error('STT API error:', response.status, errText)
+        throw new Error(`语音识别服务错误 (${response.status})`)
+      }
+
+      const data = await response.json()
+      return new Response(JSON.stringify({ text: data?.text || '' }), {
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    // No backend configured — tell user exactly what to do
     return new Response(
-      JSON.stringify({ error: 'STT 未配置。请在 Cloudflare 添加 AI binding 或设置 STT_API_URL。' }),
+      JSON.stringify({
+        error:
+          'STT 未配置。请前往 Cloudflare Pages → learningenglish → Settings → Functions → 添加 AI binding（变量名: AI），然后重新部署。',
+      }),
       { status: 501, headers: { 'Content-Type': 'application/json' } },
     )
   } catch (err: any) {
