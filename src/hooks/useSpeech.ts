@@ -14,6 +14,17 @@ export function useSpeech() {
       return
     }
     window.speechSynthesis.cancel()
+
+    // Track whether onEnd has been called (prevents duplicate calls)
+    let ended = false
+    const endOnce = () => {
+      if (ended) return
+      ended = true
+      clearInterval(pollId)
+      clearTimeout(fallbackTimer)
+      onEnd?.()
+    }
+
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'en-US'
     // Child-friendly voice: warm, clear, and engaging
@@ -30,8 +41,24 @@ export function useSpeech() {
       || voices.find(v => ['Flo', 'Karen', 'Kathy', 'Sandy', 'Shelley', 'Ava', 'Allison'].some(n => v.name.includes(n)))
       || voices.find(v => v.lang.startsWith('en-US'))
     if (matched) utterance.voice = matched
-    if (onEnd) utterance.onend = onEnd
+    utterance.onend = endOnce
     window.speechSynthesis.speak(utterance)
+
+    // Poll speechSynthesis.speaking as fallback (onend is unreliable on iOS Safari)
+    const pollId = setInterval(() => {
+      if (!window.speechSynthesis.speaking && !ended) {
+        endOnce()
+      }
+    }, 300)
+
+    // Hard timeout fallback: estimate max duration + 5s buffer
+    const estimatedMs = Math.max(text.length * 80, 5000) + 5000
+    const fallbackTimer = setTimeout(() => {
+      if (!ended) {
+        window.speechSynthesis.cancel()
+        endOnce()
+      }
+    }, estimatedMs)
   }, [level])
 
   const stop = useCallback(() => {
