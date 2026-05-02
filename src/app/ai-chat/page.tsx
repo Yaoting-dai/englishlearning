@@ -21,7 +21,6 @@ export default function AIChatPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [aiSpeaking, setAiSpeaking] = useState(false)
-  const [textInput, setTextInput] = useState('')
   const recognitionRef = useRef<any>(null)
   const readyForInputRef = useRef(false)
 
@@ -80,7 +79,7 @@ export default function AIChatPage() {
       const transcript = event.results[0][0].transcript
       recognitionRef.current = null
       setIsListening(false)
-      setTextInput(transcript) // Fill input with transcribed text
+      handleUserSpeech(transcript)
     }
 
     recognition.onerror = () => {
@@ -118,12 +117,6 @@ export default function AIChatPage() {
     }
     setIsListening(false)
   }, [])
-
-  const sendTextMessage = useCallback(() => {
-    if (!textInput.trim() || isLoading) return
-    handleUserSpeech(textInput)
-    setTextInput('')
-  }, [textInput, isLoading, handleUserSpeech])
 
   const handleStart = () => {
     setStarted(true)
@@ -202,7 +195,7 @@ export default function AIChatPage() {
           </div>
 
           {/* Input area */}
-          <div className="border-t border-gray-100 pt-3">
+          <div className="border-t border-gray-100 pt-3 text-center">
             {isListening ? (
               <div className="flex flex-col items-center gap-2 py-4">
                 <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
@@ -211,29 +204,19 @@ export default function AIChatPage() {
                 <span className="text-sm text-red-500 font-medium">Listening...</span>
               </div>
             ) : isLoading ? (
-              <div className="text-sm text-gray-400 py-4 text-center">⏳ Waiting for Elizabeth...</div>
+              <div className="text-sm text-gray-400 py-4">⏳ Waiting for Elizabeth...</div>
             ) : aiSpeaking ? (
-              <div className="text-sm text-gray-400 py-4 text-center">🔊 Elizabeth is speaking...</div>
+              <div className="text-sm text-gray-400 py-4">🔊 Elizabeth is speaking...</div>
+            ) : speechSupported ? (
+              <button onClick={startListening}
+                className="flex flex-col items-center gap-2 mx-auto active:scale-95 transition-transform">
+                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600">
+                  <span className="text-3xl text-white">🎤</span>
+                </div>
+                <span className="text-sm text-blue-500 font-medium">Tap to speak</span>
+              </button>
             ) : (
-              <div className="flex items-center gap-2">
-                {speechSupported && (
-                  <button onClick={startListening}
-                    className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-600 active:scale-95 transition-transform shrink-0"
-                    title="语音输入">
-                    <span className="text-xl">🎤</span>
-                  </button>
-                )}
-                <input type="text" value={textInput}
-                  onChange={e => setTextInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && !isLoading && sendTextMessage()}
-                  placeholder="Type your message..."
-                  disabled={isLoading || aiSpeaking}
-                  className="flex-1 px-4 py-3 bg-gray-50 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50" />
-                <button onClick={sendTextMessage} disabled={isLoading || aiSpeaking || !textInput.trim()}
-                  className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-transform shrink-0">
-                  <span className="text-lg">➤</span>
-                </button>
-              </div>
+              <p className="text-sm text-gray-400 py-4">Speech not supported in this browser</p>
             )}
           </div>
         </div>
