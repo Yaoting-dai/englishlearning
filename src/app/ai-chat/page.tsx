@@ -398,15 +398,20 @@ export default function AIChatPage() {
     messagesRef.current = []
   }
 
-  // Cleanup on unmount
+  // Cleanup on unmount — end conversation when leaving page
   useEffect(() => {
     return () => {
       stop()
       stopListening()
       stopRecording()
       stopSilenceDetection()
+      if (started) {
+        readyForInputRef.current = false
+        isAutoModeRef.current = false
+        messagesRef.current = []
+      }
     }
-  }, [stop, stopListening, stopRecording])
+  }, [stop, stopListening, stopRecording, started])
 
   const speakMessage = (text: string) => speak(text)
 
