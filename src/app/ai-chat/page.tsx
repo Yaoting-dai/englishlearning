@@ -31,8 +31,10 @@ export default function AIChatPage() {
   const readyForInputRef = useRef(false)
   const gotResultRef = useRef(false)
   const retryCountRef = useRef(0)
+  const sttRetryRef = useRef(0)
   const stoppedRef = useRef(false)
   const MAX_RETRIES = 5
+  const MAX_STT_RETRIES = 3
   // Silence detection refs
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
@@ -294,21 +296,37 @@ export default function AIChatPage() {
         try {
           const transcript = await transcribeAudio(blob)
           if (transcript.trim()) {
+            sttRetryRef.current = 0 // reset retry counter on success
             await sendToDoubaoRef.current?.(transcript.trim())
           } else {
             setSpeechError('未识别到语音，请重试')
             setIsLoading(false)
-            // Retry recording in auto mode
+            // Retry recording in auto mode (limited)
             if (isAutoModeRef.current) {
-              setTimeout(() => startRecording(true), 500)
+              sttRetryRef.current++
+              if (sttRetryRef.current < MAX_STT_RETRIES) {
+                setTimeout(() => startRecording(true), 500)
+              } else {
+                setIsAutoMode(false)
+                isAutoModeRef.current = false
+                setSpeechError('未检测到语音，已停止自动模式')
+              }
             }
           }
-        } catch {
-          setSpeechError('语音识别失败，请重试')
+        } catch (err: any) {
+          const msg = err?.message || '语音识别失败，请重试'
+          setSpeechError(msg)
           setIsLoading(false)
-          // Retry recording in auto mode
+          // Retry recording in auto mode (limited)
           if (isAutoModeRef.current) {
-            setTimeout(() => startRecording(true), 1000)
+            sttRetryRef.current++
+            if (sttRetryRef.current < MAX_STT_RETRIES) {
+              setTimeout(() => startRecording(true), 1000)
+            } else {
+              setIsAutoMode(false)
+              isAutoModeRef.current = false
+              setSpeechError('语音识别多次失败，已停止自动模式')
+            }
           }
         }
       }
@@ -343,6 +361,7 @@ export default function AIChatPage() {
   const handleStart = () => {
     setStarted(true)
     readyForInputRef.current = false
+    sttRetryRef.current = 0
     const greeting = "Hi there! I'm Elizabeth! Let's learn English together! 🎉"
     addMessage(greeting, 'ai')
     setAiSpeaking(true)
@@ -366,6 +385,7 @@ export default function AIChatPage() {
     setStarted(false)
     setIsAutoMode(false)
     isAutoModeRef.current = false
+    sttRetryRef.current = 0
     setMessages([])
     messagesRef.current = []
   }
