@@ -138,6 +138,7 @@ export const songs: SongData[] = [
     category: 'Action',
     duration: '1:30',
     audioSrc: '/audio/itsy-bitsy.mp3',
+    bvid: 'BV1n84y1x7Q9',
     lyrics: [
       { time: 0, text: 'The itsy bitsy spider climbed up the water spout' },
       { time: 6, text: 'Down came the rain and washed the spider out' },
@@ -167,6 +168,7 @@ export const songs: SongData[] = [
     category: 'Celebration',
     duration: '1:30',
     audioSrc: '/audio/happy-birthday.mp3',
+    bvid: 'BV1Sc411M7H3',
     lyrics: [
       { time: 0, text: 'Happy birthday to you' },
       { time: 5, text: 'Happy birthday to you' },
@@ -181,6 +183,7 @@ export const songs: SongData[] = [
     category: 'Holiday',
     duration: '3:00',
     audioSrc: '/audio/jingle-bells.mp3',
+    bvid: 'BV1NJ411P75Q',
     lyrics: [
       { time: 0, text: 'Jingle bells, jingle bells, jingle all the way' },
       { time: 8, text: 'Oh, what fun it is to ride in a one-horse open sleigh' },
@@ -197,6 +200,7 @@ export const songs: SongData[] = [
     category: 'Classic',
     duration: '1:15',
     audioSrc: '/audio/humpty.mp3',
+    bvid: 'BV1tY6wY8Efm',
     lyrics: [
       { time: 0, text: 'Humpty Dumpty sat on a wall' },
       { time: 4, text: 'Humpty Dumpty had a great fall' },

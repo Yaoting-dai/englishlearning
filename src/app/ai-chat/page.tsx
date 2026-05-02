@@ -34,48 +34,6 @@ export default function AIChatPage() {
     setMessages(prev => [...prev, newMsg])
   }, [])
 
-  // Start speech recognition (triggered by user tap)
-  const startListening = useCallback(() => {
-    if (isListening || isLoading) return
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SpeechRecognition) return
-
-    const recognition = new SpeechRecognition()
-    recognition.lang = 'en-US'
-    recognition.continuous = false
-    recognition.interimResults = false
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript
-      recognitionRef.current = null
-      setIsListening(false)
-      handleUserSpeech(transcript)
-    }
-
-    recognition.onerror = () => {
-      recognitionRef.current = null
-      setIsListening(false)
-    }
-
-    recognition.onend = () => {
-      recognitionRef.current = null
-      setIsListening(false)
-    }
-
-    recognitionRef.current = recognition
-    recognition.start()
-    setIsListening(true)
-  }, [isListening, isLoading])
-
-  // Stop speech recognition
-  const stopListening = useCallback(() => {
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort() } catch {}
-      recognitionRef.current = null
-    }
-    setIsListening(false)
-  }, [])
-
   // Handle user voice input
   const handleUserSpeech = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return
@@ -106,6 +64,52 @@ export default function AIChatPage() {
     }
     setIsLoading(false)
   }, [isLoading, level, speak, addMessage])
+
+  // Start speech recognition (triggered by user tap)
+  const startListening = useCallback(() => {
+    if (isListening || isLoading) return
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) return
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.continuous = false
+    recognition.interimResults = false
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript
+      recognitionRef.current = null
+      setIsListening(false)
+      handleUserSpeech(transcript)
+    }
+
+    recognition.onerror = () => {
+      recognitionRef.current = null
+      setIsListening(false)
+    }
+
+    recognition.onend = () => {
+      recognitionRef.current = null
+      setIsListening(false)
+    }
+
+    recognitionRef.current = recognition
+    try {
+      recognition.start()
+      setIsListening(true)
+    } catch {
+      setIsListening(false)
+    }
+  }, [isListening, isLoading, handleUserSpeech])
+
+  // Stop speech recognition
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort() } catch {}
+      recognitionRef.current = null
+    }
+    setIsListening(false)
+  }, [])
 
   const sendTextMessage = useCallback(() => {
     if (!textInput.trim() || isLoading) return
