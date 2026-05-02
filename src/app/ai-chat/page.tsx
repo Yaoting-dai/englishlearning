@@ -21,6 +21,7 @@ export default function AIChatPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [aiSpeaking, setAiSpeaking] = useState(false)
+  const [speechError, setSpeechError] = useState('')
   const recognitionRef = useRef<any>(null)
   const readyForInputRef = useRef(false)
 
@@ -65,10 +66,20 @@ export default function AIChatPage() {
   }, [isLoading, level, speak, addMessage])
 
   // Start speech recognition (triggered by user tap)
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async () => {
     if (isListening || isLoading) return
+    setSpeechError('')
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) return
+
+    // iOS requires explicit mic permission before starting recognition
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream.getTracks().forEach(t => t.stop())
+    } catch {
+      setSpeechError('麦克风权限被拒绝，请在设置中允许')
+      return
+    }
 
     const recognition = new SpeechRecognition()
     recognition.lang = 'en-US'
@@ -77,14 +88,17 @@ export default function AIChatPage() {
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript
-      recognitionRef.current = null
-      setIsListening(false)
-      handleUserSpeech(transcript)
+      if (transcript.trim()) {
+        recognitionRef.current = null
+        setIsListening(false)
+        handleUserSpeech(transcript)
+      }
     }
 
     recognition.onerror = () => {
       recognitionRef.current = null
       setIsListening(false)
+      setSpeechError('语音识别失败，请重试')
     }
 
     recognition.onend = () => {
@@ -102,10 +116,12 @@ export default function AIChatPage() {
           try { recognition.abort() } catch {}
           recognitionRef.current = null
           setIsListening(false)
+          setSpeechError('语音识别超时，请重试')
         }
       }, 10000)
     } catch {
       setIsListening(false)
+      setSpeechError('语音识别启动失败')
     }
   }, [isListening, isLoading, handleUserSpeech])
 
@@ -196,6 +212,9 @@ export default function AIChatPage() {
 
           {/* Input area */}
           <div className="border-t border-gray-100 pt-3 text-center">
+            {speechError && (
+              <p className="text-xs text-red-500 mb-2">{speechError}</p>
+            )}
             {isListening ? (
               <div className="flex flex-col items-center gap-2 py-4">
                 <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
