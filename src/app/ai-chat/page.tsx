@@ -97,6 +97,14 @@ export default function AIChatPage() {
     try {
       recognition.start()
       setIsListening(true)
+      // Timeout: auto-stop after 10s to prevent getting stuck on iOS
+      setTimeout(() => {
+        if (recognitionRef.current === recognition) {
+          try { recognition.abort() } catch {}
+          recognitionRef.current = null
+          setIsListening(false)
+        }
+      }, 10000)
     } catch {
       setIsListening(false)
     }
@@ -194,44 +202,44 @@ export default function AIChatPage() {
           </div>
 
           {/* Input area */}
-          <div className="border-t border-gray-100 pt-3 text-center">
-            {speechSupported ? (
-              <>
-                {isListening ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                      <span className="text-3xl text-white">🎤</span>
-                    </div>
-                    <span className="text-sm text-red-500 font-medium">Listening...</span>
+          <div className="border-t border-gray-100 pt-3">
+            {/* Mic button row */}
+            {isListening ? (
+              <div className="flex flex-col items-center gap-2 mb-3">
+                <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                  <span className="text-3xl text-white">🎤</span>
+                </div>
+                <span className="text-sm text-red-500 font-medium">Listening...</span>
+              </div>
+            ) : isLoading ? (
+              <div className="text-sm text-gray-400 py-4 text-center">⏳ Waiting for Elizabeth...</div>
+            ) : aiSpeaking ? (
+              <div className="text-sm text-gray-400 py-4 text-center">🔊 Elizabeth is speaking...</div>
+            ) : speechSupported ? (
+              <div className="flex justify-center mb-3">
+                <button onClick={startListening}
+                  className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600">
+                    <span className="text-2xl text-white">🎤</span>
                   </div>
-                ) : isLoading ? (
-                  <div className="text-sm text-gray-400 py-4">⏳ Waiting for Elizabeth...</div>
-                ) : aiSpeaking ? (
-                  <div className="text-sm text-gray-400 py-4">🔊 Elizabeth is speaking...</div>
-                ) : (
-                  <button onClick={startListening}
-                    className="flex flex-col items-center gap-2 mx-auto active:scale-95 transition-transform">
-                    <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600">
-                      <span className="text-3xl text-white">🎤</span>
-                    </div>
-                    <span className="text-sm text-blue-500 font-medium">Tap to speak</span>
-                  </button>
-                )}
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <input type="text" value={textInput}
-                  onChange={e => setTextInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && !isLoading && sendTextMessage()}
-                  placeholder={isLoading ? 'Waiting for Elizabeth...' : 'Type your message...'}
-                  disabled={isLoading || aiSpeaking}
-                  className="flex-1 px-4 py-3 bg-gray-50 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50" />
-                <button onClick={sendTextMessage} disabled={isLoading || aiSpeaking || !textInput.trim()}
-                  className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-transform">
-                  <span className="text-lg">➤</span>
+                  <span className="text-xs text-blue-500 font-medium">语音输入</span>
                 </button>
               </div>
-            )}
+            ) : null}
+
+            {/* Text input (always shown) */}
+            <div className="flex items-center gap-2">
+              <input type="text" value={textInput}
+                onChange={e => setTextInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !isLoading && sendTextMessage()}
+                placeholder={isLoading ? 'Waiting for Elizabeth...' : 'Type your message...'}
+                disabled={isLoading || aiSpeaking}
+                className="flex-1 px-4 py-3 bg-gray-50 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50" />
+              <button onClick={sendTextMessage} disabled={isLoading || aiSpeaking || !textInput.trim()}
+                className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-transform">
+                <span className="text-lg">➤</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
