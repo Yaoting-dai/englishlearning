@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Image from 'next/image'
 import { useAgeLevel } from '@/contexts/AgeLevelContext'
 import StartButton from '@/components/StartButton'
 import ChatBubble from '@/components/ChatBubble'
 import { useSpeech } from '@/hooks/useSpeech'
 import { sendMessage } from '@/services/doubao-api'
+import { transcribeAudio, isSTTConfigured } from '@/services/stt'
 
 interface Message {
   text: string
@@ -22,15 +23,32 @@ export default function AIChatPage() {
   const [isListening, setIsListening] = useState(false)
   const [aiSpeaking, setAiSpeaking] = useState(false)
   const [speechError, setSpeechError] = useState('')
+  const [isRecording, setIsRecording] = useState(false)
   const recognitionRef = useRef<any>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
   const readyForInputRef = useRef(false)
   const gotResultRef = useRef(false)
   const retryCountRef = useRef(0)
   const stoppedRef = useRef(false)
   const MAX_RETRIES = 5
 
-  const speechSupported = typeof window !== 'undefined' && (!!((window as any).SpeechRecognition) || !!((window as any).webkitSpeechRecognition))
+  // iOS detection — webkitSpeechRecognition exists but never captures audio on iOS 17+
+  const isIOS = useMemo(() => typeof navigator !== 'undefined' && (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  ), [])
+
+  const speechSupported = !isIOS && typeof window !== 'undefined' &&
+    (!!((window as any).SpeechRecognition) || !!((window as any).webkitSpeechRecognition))
+
+  const recordingSupported = typeof window !== 'undefined' &&
+    typeof navigator !== 'undefined' &&
+    !!navigator.mediaDevices?.getUserMedia &&
+    typeof MediaRecorder !== 'undefined'
+
   const messagesRef = useRef<Message[]>([])
+  const sendToDoubaoRef = useRef<((text: string) => Promise<void>) | null>(null)
 
   const addMessage = useCallback((text: string, sender: 'ai' | 'user') => {
     const newMsg = { text, sender }
@@ -38,10 +56,9 @@ export default function AIChatPage() {
     setMessages(prev => [...prev, newMsg])
   }, [])
 
-  // Handle user voice input
-  const handleUserSpeech = useCallback(async (text: string) => {
-    if (!text.trim() || isLoading) return
-    addMessage(text.trim(), 'user')
+  // Send transcript to Doubao and display reply
+  const sendToDoubao = useCallback(async (transcript: string) => {
+    addMessage(transcript, 'user')
     setIsLoading(true)
     readyForInputRef.current = false
     try {
@@ -67,7 +84,18 @@ export default function AIChatPage() {
       })
     }
     setIsLoading(false)
-  }, [isLoading, level, speak, addMessage])
+  }, [level, speak, addMessage])
+
+  // Handle user voice input (from SpeechRecognition)
+  const handleUserSpeech = useCallback(async (text: string) => {
+    if (!text.trim() || isLoading) return
+    await sendToDoubao(text.trim())
+  }, [isLoading, sendToDoubao])
+
+  // Keep ref in sync with latest sendToDoubao
+  useEffect(() => {
+    sendToDoubaoRef.current = sendToDoubao
+  }, [sendToDoubao])
 
   // Start speech recognition (triggered by user tap)
   const startListening = useCallback(() => {
@@ -166,6 +194,61 @@ export default function AIChatPage() {
     setIsListening(false)
   }, [])
 
+  // Start recording (iOS fallback — uses getUserMedia + STT API)
+  const startRecording = useCallback(async () => {
+    if (isRecording || isLoading) return
+    setSpeechError('')
+    stoppedRef.current = false
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mimeType = MediaRecorder.isTypeSupported('audio/mp4')
+        ? 'audio/mp4'
+        : 'audio/webm;codecs=opus'
+      const mediaRecorder = new MediaRecorder(stream, { mimeType })
+      audioChunksRef.current = []
+
+      mediaRecorder.ondataavailable = (e: BlobEvent) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data)
+      }
+
+      mediaRecorder.onstop = async () => {
+        // Release mic
+        stream.getTracks().forEach(t => t.stop())
+        setIsRecording(false)
+        const blob = new Blob(audioChunksRef.current, { type: mimeType })
+        if (blob.size === 0) return
+
+        setIsLoading(true)
+        try {
+          const transcript = await transcribeAudio(blob)
+          if (transcript.trim()) {
+            await sendToDoubaoRef.current?.(transcript.trim())
+          } else {
+            setSpeechError('未识别到语音，请重试')
+            setIsLoading(false)
+          }
+        } catch {
+          setSpeechError('语音识别失败，请重试')
+          setIsLoading(false)
+        }
+      }
+
+      mediaRecorderRef.current = mediaRecorder
+      mediaRecorder.start()
+      setIsRecording(true)
+    } catch {
+      setSpeechError('无法访问麦克风，请允许麦克风权限')
+    }
+  }, [isRecording, isLoading])
+
+  // Stop recording
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop()
+      mediaRecorderRef.current = null
+    }
+  }, [])
+
   const handleStart = () => {
     setStarted(true)
     readyForInputRef.current = false
@@ -181,6 +264,7 @@ export default function AIChatPage() {
   const handleStop = () => {
     stop()
     stopListening()
+    stopRecording()
     setAiSpeaking(false)
     readyForInputRef.current = false
     setStarted(false)
@@ -193,8 +277,9 @@ export default function AIChatPage() {
     return () => {
       stop()
       stopListening()
+      stopRecording()
     }
-  }, [stop, stopListening])
+  }, [stop, stopListening, stopRecording])
 
   const speakMessage = (text: string) => speak(text)
 
@@ -247,7 +332,17 @@ export default function AIChatPage() {
             {speechError && (
               <p className="text-xs text-red-500 mb-2">{speechError}</p>
             )}
-            {isListening ? (
+            {isRecording ? (
+              <div className="flex flex-col items-center gap-2 py-4">
+                <button onClick={stopRecording}
+                  className="flex flex-col items-center gap-2 mx-auto active:scale-95 transition-transform">
+                  <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                    <span className="text-3xl text-white">⏹</span>
+                  </div>
+                  <span className="text-sm text-red-500 font-medium">Recording... tap to stop</span>
+                </button>
+              </div>
+            ) : isListening ? (
               <div className="flex flex-col items-center gap-2 py-4">
                 <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
                   <span className="text-3xl text-white">🎤</span>
@@ -255,7 +350,7 @@ export default function AIChatPage() {
                 <span className="text-sm text-red-500 font-medium">Listening...</span>
               </div>
             ) : isLoading ? (
-              <div className="text-sm text-gray-400 py-4">⏳ Waiting for Elizabeth...</div>
+              <div className="text-sm text-gray-400 py-4">⏳ {recordingSupported ? 'Transcribing...' : 'Waiting for Elizabeth...'}</div>
             ) : aiSpeaking ? (
               <div className="text-sm text-gray-400 py-4">🔊 Elizabeth is speaking...</div>
             ) : speechSupported ? (
@@ -266,6 +361,19 @@ export default function AIChatPage() {
                 </div>
                 <span className="text-sm text-blue-500 font-medium">Tap to speak</span>
               </button>
+            ) : recordingSupported && isSTTConfigured() ? (
+              <button onClick={startRecording}
+                className="flex flex-col items-center gap-2 mx-auto active:scale-95 transition-transform">
+                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600">
+                  <span className="text-3xl text-white">🎤</span>
+                </div>
+                <span className="text-sm text-blue-500 font-medium">Tap to record</span>
+              </button>
+            ) : recordingSupported ? (
+              <div className="text-sm text-amber-500 py-4">
+                <p>⚠️ Speech-to-text API not configured</p>
+                <p className="text-xs mt-1">Set NEXT_PUBLIC_STT_API_KEY in Cloudflare Pages env vars</p>
+              </div>
             ) : (
               <p className="text-sm text-gray-400 py-4">Speech not supported in this browser</p>
             )}
