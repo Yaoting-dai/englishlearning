@@ -66,32 +66,26 @@ export default function AIChatPage() {
   }, [isLoading, level, speak, addMessage])
 
   // Start speech recognition (triggered by user tap)
-  const startListening = useCallback(async () => {
+  const startListening = useCallback(() => {
     if (isListening || isLoading) return
     setSpeechError('')
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) return
 
-    // iOS requires explicit mic permission before starting recognition
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      stream.getTracks().forEach(t => t.stop())
-    } catch {
-      setSpeechError('麦克风权限被拒绝，请在设置中允许')
-      return
-    }
-
     const recognition = new SpeechRecognition()
     recognition.lang = 'en-US'
     recognition.continuous = false
-    recognition.interimResults = false
+    recognition.interimResults = true
 
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript
-      if (transcript.trim()) {
-        recognitionRef.current = null
-        setIsListening(false)
-        handleUserSpeech(transcript)
+      const result = event.results[event.results.length - 1]
+      if (result.isFinal) {
+        const transcript = result[0].transcript
+        if (transcript.trim()) {
+          recognitionRef.current = null
+          setIsListening(false)
+          handleUserSpeech(transcript.trim())
+        }
       }
     }
 
@@ -110,7 +104,7 @@ export default function AIChatPage() {
     try {
       recognition.start()
       setIsListening(true)
-      // Timeout: auto-stop after 10s to prevent getting stuck on iOS
+      // Timeout: auto-stop after 15s to prevent getting stuck on iOS
       setTimeout(() => {
         if (recognitionRef.current === recognition) {
           try { recognition.abort() } catch {}
@@ -118,7 +112,7 @@ export default function AIChatPage() {
           setIsListening(false)
           setSpeechError('语音识别超时，请重试')
         }
-      }, 10000)
+      }, 15000)
     } catch {
       setIsListening(false)
       setSpeechError('语音识别启动失败')
