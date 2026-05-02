@@ -126,6 +126,7 @@ export default function AIChatPage() {
 
       const dataArray = new Uint8Array(analyser.frequencyBinCount)
       silenceStartRef.current = null
+      let hasSpoken = false // only stop silence after speech detected
 
       const detect = () => {
         if (!analyserRef.current || mediaRecorderRef.current?.state !== 'recording') return
@@ -134,15 +135,18 @@ export default function AIChatPage() {
         const normalized = Math.abs(max - 128) / 128
 
         if (normalized < 0.05) {
-          if (!silenceStartRef.current) silenceStartRef.current = Date.now()
-          else if (Date.now() - silenceStartRef.current >= 3000) {
-            silenceStartRef.current = null
-            if (mediaRecorderRef.current?.state === 'recording') {
-              mediaRecorderRef.current.stop()
+          if (hasSpoken) {
+            if (!silenceStartRef.current) silenceStartRef.current = Date.now()
+            else if (Date.now() - silenceStartRef.current >= 1500) {
+              silenceStartRef.current = null
+              if (mediaRecorderRef.current?.state === 'recording') {
+                mediaRecorderRef.current.stop()
+              }
+              return
             }
-            return
           }
         } else {
+          hasSpoken = true
           silenceStartRef.current = null
         }
         animFrameRef.current = requestAnimationFrame(detect)

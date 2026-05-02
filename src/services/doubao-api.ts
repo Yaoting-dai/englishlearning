@@ -53,7 +53,35 @@ export async function sendMessage(messages: ChatMessage[], ageLevel: string): Pr
       }
       return replies[ageLevel] || "Hello! Tell me about your day!"
     }
-    return "That's wonderful! 🌟 Tell me more! What else would you like to practice today?"
+
+    // Varied demo responses to avoid repetition
+    const demos: Record<string, string[]> = {
+      kindergarten: [
+        "That's great! 🌟 Can you tell me more? What color do you like?",
+        "Wonderful! 🎉 Do you like animals? I love cats and dogs! 🐱🐶",
+        "Good job! 👏 Let's practice some words! Can you say 'apple'? 🍎",
+        "Amazing! 🌟 What's your favorite toy? I like balls and dolls! 🎈",
+        "Super! ⭐ Let's count together! One, two, three! Can you try? 🔢",
+      ],
+      elementary: [
+        "That's interesting! 😊 Can you tell me more about that?",
+        "Great answer! 👏 How was your day today? Did you do anything fun?",
+        "Excellent! 🌟 What's your favorite subject in school?",
+        "I like that! 🎉 Do you have any hobbies? I love reading and drawing!",
+        "Wonderful! ⭐ Let's learn a new word. What do you call this? 🤔",
+      ],
+      middle: [
+        "That's a great point! 😊 Tell me more about your thoughts.",
+        "Interesting! 👏 How do you feel about that?",
+        "Excellent perspective! 🌟 What else have you been learning lately?",
+        "Good thinking! 🎉 Do you have any questions for me?",
+        "I appreciate that! ⭐ Let's explore this topic further!",
+      ],
+    }
+
+    const list = demos[ageLevel] || demos.elementary
+    const idx = Math.floor(Math.random() * list.length)
+    return list[idx]
   }
 
   // Add system prompt based on age level
