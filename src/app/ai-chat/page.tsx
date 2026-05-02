@@ -89,7 +89,11 @@ export default function AIChatPage() {
         }
       })
     } catch {
-      const fallback = "That's great! Tell me more! 😊"
+      // Varied fallback to avoid repetition when API is unavailable
+      const fallbacks = level === 'kindergarten'
+        ? ["Let's try something else! 🌟 Can you say 'apple'? 🍎", "Good job! 👏 What color do you like? 🎨", "Great! ⭐ Do you have a favorite animal? 🐱"]
+        : ["Interesting! Tell me more about that!", "I'd love to hear more! What else do you like?", "Great! Can you describe it in more detail?"]
+      const fallback = fallbacks[Math.floor(Math.random() * fallbacks.length)]
       addMessage(fallback, 'ai')
       setAiSpeaking(true)
       speak(fallback, undefined, () => {
